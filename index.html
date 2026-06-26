@@ -1,0 +1,538 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans,'Anthropic Sans',sans-serif)}
+:root{
+  --blue:#1a6fb5;--blue-bg:#e8f2fb;--blue-text:#0c447c;
+  --green:#27a06b;--green-bg:#e0f5ec;--green-text:#085041;
+  --yellow:#b87a12;--yellow-bg:#fef3d8;--yellow-text:#854f0b;
+  --red:#c93a3a;--red-bg:#fce8e8;--red-text:#791f1f;
+  --gray-text:#5f5e5a;
+}
+.app{display:flex;flex-direction:column;min-height:600px;background:var(--surface-0,#f1efe8)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surface-2,#fff);border-bottom:0.5px solid var(--border,#ddd)}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700}
+.logo-text{font-size:15px;font-weight:500;color:var(--text-primary)}
+.logo-sub{font-size:11px;color:var(--text-muted,#888);margin-left:2px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.badge{font-size:11px;padding:3px 8px;border-radius:4px;font-weight:500}
+.badge-live{background:#e0f5ec;color:#085041}
+.badge-wifi{background:#e8f2fb;color:#0c447c;display:flex;align-items:center;gap:4px}
+.time-display{font-size:12px;color:var(--gray-text);font-variant-numeric:tabular-nums}
+
+.tabs{display:flex;gap:0;border-bottom:0.5px solid var(--border);background:var(--surface-2,#fff)}
+.tab{padding:9px 16px;font-size:13px;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
+.tab:hover:not(.active){color:var(--text-primary);background:var(--surface-1)}
+
+.content{flex:1;overflow:auto}
+.section{display:none;padding:14px}
+.section.active{display:block}
+
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:var(--surface-1,#f9f8f5);border-radius:10px;padding:12px 14px}
+.stat-label{font-size:11px;color:var(--gray-text);margin-bottom:4px;display:flex;align-items:center;gap:4px}
+.stat-val{font-size:22px;font-weight:500;color:var(--text-primary);line-height:1}
+.stat-sub{font-size:11px;color:var(--gray-text);margin-top:3px}
+.stat-card.danger .stat-val{color:var(--red)}
+.stat-card.warn .stat-val{color:var(--yellow)}
+.stat-card.good .stat-val{color:var(--green)}
+.stat-card.info .stat-val{color:var(--blue)}
+
+.map-container{position:relative;background:#d4e6f1;border-radius:10px;overflow:hidden;height:300px;margin-bottom:14px}
+.map-svg{width:100%;height:100%}
+.map-overlay{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:6px}
+.map-ctrl{background:var(--surface-2,#fff);border:0.5px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;gap:4px}
+.map-ctrl:hover{background:var(--surface-1)}
+.map-ctrl.active-toggle{color:var(--blue);border-color:var(--blue)}
+.legend{position:absolute;bottom:8px;left:8px;background:rgba(255,255,255,0.92);border-radius:6px;padding:6px 10px;font-size:11px}
+.legend-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;color:var(--text-secondary)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.tooltip{position:absolute;background:var(--surface-2,#fff);border:0.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;pointer-events:none;z-index:10;min-width:160px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:none}
+.tt-name{font-weight:500;margin-bottom:4px;color:var(--text-primary)}
+.tt-row{display:flex;justify-content:space-between;gap:16px;color:var(--gray-text)}
+
+.sensor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.sensor-card{background:var(--surface-2,#fff);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px}
+.sensor-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.sensor-name{font-size:13px;font-weight:500;color:var(--text-primary)}
+.sensor-loc{font-size:11px;color:var(--gray-text);margin-top:2px}
+.status-pill{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;white-space:nowrap}
+.pill-green{background:var(--green-bg);color:var(--green-text)}
+.pill-yellow{background:var(--yellow-bg);color:var(--yellow-text)}
+.pill-red{background:var(--red-bg);color:var(--red-text)}
+.pill-gray{background:var(--surface-1);color:var(--gray-text)}
+.sensor-bars{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bar-wrap{font-size:11px;color:var(--gray-text)}
+.bar-label{margin-bottom:3px}
+.bar-track{height:6px;background:var(--surface-1);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s}
+.bar-val{margin-top:2px;font-weight:500;color:var(--text-primary);font-size:12px}
+.simulate-btn{margin-top:10px;width:100%;padding:6px;font-size:12px;border:0.5px solid var(--border-strong);border-radius:6px;background:var(--surface-1);cursor:pointer;color:var(--text-secondary)}
+.simulate-btn:hover{background:var(--surface-0)}
+
+.alert-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.alert-item{display:flex;gap:10px;background:var(--surface-2,#fff);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;align-items:flex-start}
+.alert-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.alert-red .alert-icon{background:var(--red-bg);color:var(--red)}
+.alert-yellow .alert-icon{background:var(--yellow-bg);color:var(--yellow)}
+.alert-green .alert-icon{background:var(--green-bg);color:var(--green)}
+.alert-text{flex:1}
+.alert-title{font-size:13px;font-weight:500;color:var(--text-primary)}
+.alert-desc{font-size:11px;color:var(--gray-text);margin-top:2px}
+.alert-time{font-size:11px;color:var(--gray-text);margin-top:1px}
+.alert-action{font-size:11px;padding:4px 10px;border:0.5px solid var(--border-strong);border-radius:5px;background:transparent;cursor:pointer;color:var(--text-secondary);white-space:nowrap}
+.alert-action:hover{background:var(--surface-1)}
+.alert-action.urgent{border-color:var(--red);color:var(--red)}
+
+.chart-box{background:var(--surface-2,#fff);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.chart-title{font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.chart-area{height:120px;position:relative}
+.chart-svg{width:100%;height:100%}
+
+.data-table{width:100%;border-collapse:collapse;font-size:12px}
+.data-table th{text-align:left;padding:7px 10px;color:var(--gray-text);font-weight:500;border-bottom:0.5px solid var(--border);font-size:11px}
+.data-table td{padding:7px 10px;border-bottom:0.5px solid var(--border);color:var(--text-primary);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--surface-0)}
+.progress-wrap{display:flex;align-items:center;gap:6px}
+.progress-bar{flex:1;height:5px;background:var(--surface-1);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px}
+.pf-red{background:var(--red)}
+.pf-yellow{background:var(--yellow)}
+.pf-green{background:var(--green)}
+.action-btn{font-size:11px;padding:3px 8px;border:0.5px solid var(--border-strong);border-radius:4px;background:transparent;cursor:pointer;color:var(--text-secondary)}
+.action-btn:hover{background:var(--surface-1)}
+.action-btn.primary{border-color:var(--blue);color:var(--blue)}
+.section-header{font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.filter-chip{font-size:11px;padding:4px 10px;border:0.5px solid var(--border-strong);border-radius:16px;cursor:pointer;color:var(--gray-text);background:transparent}
+.filter-chip.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-text)}
+.filter-chip:hover:not(.active){background:var(--surface-1)}
+.scroll-table{overflow-x:auto;border-radius:8px;border:0.5px solid var(--border)}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-label{font-size:12px;color:var(--gray-text)}
+.form-input{font-size:13px;padding:7px 10px;border:0.5px solid var(--border-strong);border-radius:6px;background:var(--surface-2);color:var(--text-primary)}
+.form-input:focus{outline:none;border-color:var(--blue)}
+select.form-input{cursor:pointer}
+.submit-btn{width:100%;padding:9px;background:var(--blue);color:#fff;border:none;border-radius:7px;font-size:13px;cursor:pointer;font-weight:500}
+.submit-btn:hover{opacity:0.9}
+.notification-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.noti-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.noti-text{flex:1}
+.noti-title{font-size:13px;color:var(--text-primary)}
+.noti-sub{font-size:11px;color:var(--gray-text);margin-top:1px}
+.noti-time{font-size:11px;color:var(--gray-text);white-space:nowrap}
+.hotspot-badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:3px;font-weight:500}
+.hs-red{background:var(--red-bg);color:var(--red-text)}
+.hs-yellow{background:var(--yellow-bg);color:var(--yellow-text)}
+.hs-green{background:var(--green-bg);color:var(--green-text)}
+.weather-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.weather-card{background:var(--surface-2,#fff);border:0.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;display:flex;align-items:center;gap:8px;flex:1;min-width:100px}
+.weather-val{font-size:16px;font-weight:500;color:var(--text-primary)}
+.weather-lbl{font-size:10px;color:var(--gray-text)}
+.rain-icon{font-size:20px}
+</style>
+
+<div class="app">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon">BK</div>
+      <div>
+        <span class="logo-text">BKK MicroFlow</span>
+        <span class="logo-sub">v0.9 Prototype</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="badge badge-live"><i class="ti ti-circle-filled" style="font-size:8px;color:var(--green)"></i> Live</span>
+      <span class="badge badge-wifi"><i class="ti ti-wifi" aria-hidden="true"></i> Firebase</span>
+      <span class="time-display" id="clock"></span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('dashboard')"><i class="ti ti-dashboard" aria-hidden="true"></i> แดชบอร์ด</div>
+    <div class="tab" onclick="switchTab('sensors')"><i class="ti ti-cpu" aria-hidden="true"></i> เซนเซอร์</div>
+    <div class="tab" onclick="switchTab('alerts')"><i class="ti ti-bell" aria-hidden="true"></i> แจ้งเตือน <span id="alert-count" style="background:var(--red-bg);color:var(--red-text);font-size:10px;padding:1px 5px;border-radius:8px;font-weight:600">3</span></div>
+    <div class="tab" onclick="switchTab('map')"><i class="ti ti-map" aria-hidden="true"></i> แผนที่</div>
+    <div class="tab" onclick="switchTab('report')"><i class="ti ti-file-analytics" aria-hidden="true"></i> รายงาน</div>
+    <div class="tab" onclick="switchTab('settings')"><i class="ti ti-settings" aria-hidden="true"></i> ตั้งค่า</div>
+  </div>
+
+  <div class="content">
+    <div class="section active" id="tab-dashboard">
+      <div class="weather-bar">
+        <div class="weather-card"><span class="rain-icon">🌧</span><div><div class="weather-val">78%</div><div class="weather-lbl">ความชื้น</div></div></div>
+        <div class="weather-card"><i class="ti ti-cloud-rain" style="font-size:20px;color:#378add" aria-hidden="true"></i><div><div class="weather-val">23 มม.</div><div class="weather-lbl">ฝนพยากรณ์/วัน</div></div></div>
+        <div class="weather-card"><i class="ti ti-temperature" style="font-size:20px;color:#ba7517" aria-hidden="true"></i><div><div class="weather-val">31°C</div><div class="weather-lbl">อุณหภูมิ</div></div></div>
+        <div class="weather-card"><i class="ti ti-alert-triangle" style="font-size:20px;color:var(--red)" aria-hidden="true"></i><div><div class="weather-val" style="color:var(--red)">สูง</div><div class="weather-lbl">ความเสี่ยงน้ำท่วม</div></div></div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card info"><div class="stat-label"><i class="ti ti-cpu" aria-hidden="true"></i> เซนเซอร์ทั้งหมด</div><div class="stat-val">24</div><div class="stat-sub">ออนไลน์ 21 / ออฟไลน์ 3</div></div>
+        <div class="stat-card danger"><div class="stat-label"><i class="ti ti-alert-circle" aria-hidden="true"></i> อุดตันวิกฤต</div><div class="stat-val" id="crit-count">3</div><div class="stat-sub">ต้องดำเนินการทันที</div></div>
+        <div class="stat-card warn"><div class="stat-label"><i class="ti ti-alert-triangle" aria-hidden="true"></i> เฝ้าระวัง</div><div class="stat-val">7</div><div class="stat-sub">ความเสี่ยงปานกลาง</div></div>
+        <div class="stat-card good"><div class="stat-label"><i class="ti ti-check" aria-hidden="true"></i> ปกติ</div><div class="stat-val">14</div><div class="stat-sub">ระบายน้ำดี</div></div>
+      </div>
+
+      <div class="map-container" id="main-map-container">
+        <svg class="map-svg" viewBox="0 0 600 300" id="main-map">
+          <rect width="600" height="300" fill="#c8dff0"/>
+          <path d="M60 80 Q120 60 200 75 L260 85 Q300 90 360 80 L440 70 Q500 65 560 80 L560 200 Q520 210 480 220 L400 240 Q350 250 300 245 L220 255 Q160 260 100 240 L60 220Z" fill="#b8d4e8" opacity="0.5"/>
+          <path d="M100 150 L180 140 Q220 135 260 145 L320 150 L380 140 L450 135 L520 145" stroke="#7ab0d4" stroke-width="2" fill="none"/>
+          <path d="M200 80 L210 160 L215 240" stroke="#7ab0d4" stroke-width="1.5" fill="none"/>
+          <path d="M350 75 L355 150 L350 240" stroke="#7ab0d4" stroke-width="1.5" fill="none"/>
+          <rect x="80" y="90" width="40" height="30" rx="3" fill="#cde8b4" stroke="#aac8a0" stroke-width="0.5"/>
+          <rect x="130" y="100" width="60" height="25" rx="3" fill="#d4dce8" stroke="#a8b4c4" stroke-width="0.5"/>
+          <rect x="200" y="88" width="55" height="30" rx="3" fill="#d4dce8" stroke="#a8b4c4" stroke-width="0.5"/>
+          <rect x="270" y="90" width="70" height="25" rx="3" fill="#e0dcd4" stroke="#c0b8b0" stroke-width="0.5"/>
+          <rect x="360" y="85" width="50" height="30" rx="3" fill="#d4dce8" stroke="#a8b4c4" stroke-width="0.5"/>
+          <rect x="430" y="90" width="65" height="28" rx="3" fill="#cde8b4" stroke="#aac8a0" stroke-width="0.5"/>
+          <rect x="120" y="160" width="80" height="30" rx="3" fill="#d4dce8" stroke="#a8b4c4" stroke-width="0.5"/>
+          <rect x="240" y="165" width="70" height="28" rx="3" fill="#d4dce8" stroke="#a8b4c4" stroke-width="0.5"/>
+          <rect x="340" y="160" width="80" height="30" rx="3" fill="#e0dcd4" stroke="#c0b8b0" stroke-width="0.5"/>
+          <rect x="440" y="155" width="60" height="35" rx="3" fill="#d4dce8" stroke="#a8b4c4" stroke-width="0.5"/>
+          <text x="300" y="18" text-anchor="middle" style="font-size:11px;fill:#5f7a8a;font-weight:500">แผนที่จำลอง กรุงเทพมหานคร (Prototype)</text>
+          <g id="sensor-pins"></g>
+        </svg>
+        <div class="map-overlay">
+          <button class="map-ctrl active-toggle" id="toggle-open-data" onclick="toggleOpenData()"><i class="ti ti-map-2" aria-hidden="true"></i> Open Data กทม.</button>
+          <button class="map-ctrl" onclick="refreshMap()"><i class="ti ti-refresh" aria-hidden="true"></i> รีเฟรช</button>
+          <button class="map-ctrl" onclick="sendPrompt('อธิบายการทำงานของระบบ BKK MicroFlow ในแผนที่นี้')"><i class="ti ti-help" aria-hidden="true"></i> ช่วยเหลือ ↗</button>
+        </div>
+        <div class="legend">
+          <div class="legend-row"><div class="legend-dot" style="background:#e24b4a"></div> วิกฤต</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#ef9f27"></div> เฝ้าระวัง</div>
+          <div class="legend-row"><div class="legend-dot" style="background:#27a06b"></div> ปกติ</div>
+          <div class="legend-row" id="open-data-legend" style="display:none"><div class="legend-dot" style="background:#5B5EA6;opacity:0.7"></div> จุดน้ำท่วมซ้ำซาก</div>
+        </div>
+        <div class="tooltip" id="map-tooltip"></div>
+      </div>
+
+      <div class="chart-box">
+        <div class="chart-title">ระดับน้ำเฉลี่ยรายชั่วโมง (ซม.) — 12 ชั่วโมงที่ผ่านมา <span style="font-size:11px;color:var(--gray-text)">เรียลไทม์</span></div>
+        <div class="chart-area">
+          <svg class="chart-svg" id="water-chart" viewBox="0 0 560 110" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="tab-sensors">
+      <div class="section-header">เซนเซอร์ทั้งหมด <button class="action-btn primary" onclick="addSimSensor()"><i class="ti ti-plus" aria-hidden="true"></i> เพิ่มเซนเซอร์</button></div>
+      <div class="filter-row">
+        <div class="filter-chip active" onclick="filterSensors('all',this)">ทั้งหมด (24)</div>
+        <div class="filter-chip" onclick="filterSensors('critical',this)">วิกฤต (3)</div>
+        <div class="filter-chip" onclick="filterSensors('warning',this)">เฝ้าระวัง (7)</div>
+        <div class="filter-chip" onclick="filterSensors('normal',this)">ปกติ (14)</div>
+        <div class="filter-chip" onclick="filterSensors('offline',this)">ออฟไลน์ (3)</div>
+      </div>
+      <div class="sensor-grid" id="sensor-grid"></div>
+    </div>
+
+    <div class="section" id="tab-alerts">
+      <div class="section-header">การแจ้งเตือน <button class="action-btn" onclick="clearAlerts()">ล้างทั้งหมด</button></div>
+      <div class="alert-list" id="alert-list"></div>
+    </div>
+
+    <div class="section" id="tab-map">
+      <div class="section-header">แผนที่ Hotspot อุดตัน <button class="action-btn primary" onclick="sendPrompt('วิเคราะห์จุดเสี่ยงน้ำท่วมในแผนที่นี้ ↗')">วิเคราะห์ AI ↗</button></div>
+      <div class="scroll-table">
+        <table class="data-table" id="hotspot-table">
+          <thead><tr><th>ซอย / พื้นที่</th><th>เขต</th><th>ระดับน้ำ</th><th>สถานะ</th><th>ข้อร้องเรียน (Traffy)</th><th>การดำเนินการ</th></tr></thead>
+          <tbody id="hotspot-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section" id="tab-report">
+      <div class="section-header">รายงาน & สถิติ</div>
+      <div class="chart-box">
+        <div class="chart-title">จำนวนเหตุการณ์อุดตันรายวัน (7 วันที่ผ่านมา)</div>
+        <div class="chart-area">
+          <svg class="chart-svg" id="event-chart" viewBox="0 0 560 110" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">เปรียบเทียบประสิทธิภาพรายเขต</div>
+        <div class="chart-area" style="height:140px">
+          <svg class="chart-svg" id="district-chart" viewBox="0 0 560 130" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="submit-btn" style="background:var(--surface-2);color:var(--blue);border:0.5px solid var(--blue)" onclick="downloadReport()"><i class="ti ti-download" aria-hidden="true"></i> ดาวน์โหลดรายงาน PDF</button>
+      </div>
+    </div>
+
+    <div class="section" id="tab-settings">
+      <div class="section-header">ตั้งค่าระบบ</div>
+      <div class="chart-box">
+        <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:12px">เพิ่มเซนเซอร์ใหม่</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">รหัสเซนเซอร์</label><input class="form-input" placeholder="เช่น ESP32-025"/></div>
+          <div class="form-group"><label class="form-label">ตำแหน่ง (ซอย)</label><input class="form-input" placeholder="เช่น ซอยลาดพร้าว 15"/></div>
+          <div class="form-group"><label class="form-label">เขต</label><select class="form-input"><option>ลาดพร้าว</option><option>บึงกุ่ม</option><option>บางกะปิ</option><option>ห้วยขวาง</option><option>สาทร</option><option>พระโขนง</option></select></div>
+          <div class="form-group"><label class="form-label">ประเภทเซนเซอร์</label><select class="form-input"><option>Ultrasonic + Infrared</option><option>Ultrasonic only</option><option>Infrared only</option></select></div>
+        </div>
+        <button class="submit-btn" onclick="saveSensor()">บันทึกเซนเซอร์</button>
+      </div>
+      <div class="chart-box" style="margin-top:10px">
+        <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:12px">ตั้งค่าการแจ้งเตือน</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">ระดับน้ำวิกฤต (ซม.)</label><input class="form-input" type="number" value="80"/></div>
+          <div class="form-group"><label class="form-label">ระดับน้ำเฝ้าระวัง (ซม.)</label><input class="form-input" type="number" value="50"/></div>
+          <div class="form-group"><label class="form-label">ส่งแจ้งเตือน LINE</label><select class="form-input"><option>เปิด</option><option>ปิด</option></select></div>
+          <div class="form-group"><label class="form-label">Moving Average (ค่า)</label><input class="form-input" type="number" value="10"/></div>
+        </div>
+        <button class="submit-btn" onclick="saveSettings()">บันทึกการตั้งค่า</button>
+      </div>
+      <div class="chart-box" style="margin-top:10px">
+        <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:10px">ข้อมูล Firebase Realtime Database</div>
+        <div id="firebase-log" style="background:var(--surface-0);border-radius:6px;padding:10px;font-size:11px;font-family:var(--font-mono,monospace);color:var(--text-secondary);max-height:120px;overflow-y:auto;line-height:1.8"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const sensors = [
+  {id:'ESP32-001',name:'ซอยลาดพร้าว 15',zone:'ลาดพร้าว',water:88,debris:92,status:'critical',lat:130,lng:115,complaints:18,online:true},
+  {id:'ESP32-002',name:'ซอยรามคำแหง 43',zone:'บางกะปิ',water:75,debris:60,status:'warning',lat:200,lng:145,complaints:12,online:true},
+  {id:'ESP32-003',name:'ซอยอ่อนนุช 17',zone:'พระโขนง',water:20,debris:15,status:'normal',lat:300,lng:150,complaints:2,online:true},
+  {id:'ESP32-004',name:'ถนนสาทรใต้ ซ.3',zone:'สาทร',water:91,debris:85,status:'critical',lat:165,lng:195,complaints:21,online:true},
+  {id:'ESP32-005',name:'ซอยนวมินทร์ 22',zone:'บึงกุ่ม',water:45,debris:38,status:'warning',lat:390,lng:130,complaints:8,online:true},
+  {id:'ESP32-006',name:'ซอยห้วยขวาง 9',zone:'ห้วยขวาง',water:12,debris:10,status:'normal',lat:270,lng:175,complaints:1,online:true},
+  {id:'ESP32-007',name:'ซอยพระราม 4 ซ.1',zone:'คลองเตย',water:82,debris:77,status:'critical',lat:460,lng:155,complaints:16,online:true},
+  {id:'ESP32-008',name:'ซอยบางนา 12',zone:'บางนา',water:58,debris:52,status:'warning',lat:520,lng:190,complaints:9,online:true},
+  {id:'ESP32-009',name:'ซอยลาดพร้าว 87',zone:'ลาดพร้าว',water:30,debris:22,status:'normal',lat:105,lng:165,complaints:3,online:true},
+  {id:'ESP32-010',name:'ซอยงามวงศ์วาน 4',zone:'จตุจักร',water:55,debris:48,status:'warning',lat:225,lng:100,complaints:7,online:true},
+  {id:'ESP32-011',name:'ซอยพหลโยธิน 5',zone:'พญาไท',water:18,debris:12,status:'normal',lat:330,lng:95,complaints:1,online:true},
+  {id:'ESP32-012',name:'ซอยอารีย์ 1',zone:'ราษฎร์บูรณะ',water:0,debris:0,status:'offline',lat:410,lng:105,complaints:0,online:false},
+];
+
+const alerts = [
+  {type:'critical',title:'อุดตันวิกฤต! ซอยสาทรใต้ ซ.3',desc:'ระดับน้ำ 91 ซม. — เกินค่าเฝ้าระวัง ส่งหน่วยเร่งด่วน',time:'3 นาทีที่แล้ว',id:'a1'},
+  {type:'critical',title:'น้ำท่วมขัง ซอยลาดพร้าว 15',desc:'Infrared ตรวจพบขยะ 92% — ระดับน้ำสูงขึ้นต่อเนื่อง',time:'8 นาทีที่แล้ว',id:'a2'},
+  {type:'critical',title:'ESP32-007 แจ้งเตือนสูงสุด',desc:'ซอยพระราม 4 ซ.1 — ระดับน้ำ 82 ซม. ขยะอุดตัน 77%',time:'12 นาทีที่แล้ว',id:'a3'},
+  {type:'warning',title:'ระดับน้ำสูงขึ้น ซอยรามคำแหง 43',desc:'ค่า Moving Average เริ่มเพิ่ม ควรเฝ้าระวัง',time:'25 นาทีที่แล้ว',id:'a4'},
+  {type:'warning',title:'ESP32-005 — เฝ้าระวัง',desc:'ซอยนวมินทร์ 22 ระดับขยะ 38% แนวโน้มขึ้น',time:'40 นาทีที่แล้ว',id:'a5'},
+  {type:'resolved',title:'ESP32-009 กลับสู่ปกติ',desc:'หลังทีมลอกท่อเสร็จสิ้น ระดับน้ำลดลงเป็น 30 ซม.',time:'2 ชั่วโมงที่แล้ว',id:'a6'},
+];
+
+const hotspots = [
+  {zone:'ซอยลาดพร้าว 15','district':'ลาดพร้าว',water:88,status:'critical',complaints:18},
+  {zone:'ถนนสาทรใต้ ซ.3','district':'สาทร',water:91,status:'critical',complaints:21},
+  {zone:'ซอยพระราม 4 ซ.1','district':'คลองเตย',water:82,status:'critical',complaints:16},
+  {zone:'ซอยรามคำแหง 43','district':'บางกะปิ',water:75,status:'warning',complaints:12},
+  {zone:'ซอยบางนา 12','district':'บางนา',water:58,status:'warning',complaints:9},
+  {zone:'ซอยงามวงศ์วาน 4','district':'จตุจักร',water:55,status:'warning',complaints:7},
+  {zone:'ซอยนวมินทร์ 22','district':'บึงกุ่ม',water:45,status:'warning',complaints:8},
+  {zone:'ซอยอ่อนนุช 17','district':'พระโขนง',water:20,status:'normal',complaints:2},
+  {zone:'ซอยห้วยขวาง 9','district':'ห้วยขวาง',water:12,status:'normal',complaints:1},
+  {zone:'ซอยพหลโยธิน 5','district':'พญาไท',water:18,status:'normal',complaints:1},
+];
+
+let openDataVisible = false;
+
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));
+  const tabs=['dashboard','sensors','alerts','map','report','settings'];
+  const idx=tabs.indexOf(t);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='sensors')renderSensors('all');
+  if(t==='alerts')renderAlerts();
+  if(t==='map')renderHotspots();
+  if(t==='report')renderCharts();
+  if(t==='settings')renderFirebaseLog();
+}
+
+function renderSensors(filter){
+  const grid=document.getElementById('sensor-grid');
+  const show=filter==='all'?sensors:sensors.filter(s=>s.status===filter);
+  grid.innerHTML=show.map(s=>`
+    <div class="sensor-card">
+      <div class="sensor-header">
+        <div><div class="sensor-name">${s.id}</div><div class="sensor-loc">${s.name} · ${s.zone}</div></div>
+        <span class="status-pill ${s.status==='critical'?'pill-red':s.status==='warning'?'pill-yellow':s.status==='offline'?'pill-gray':'pill-green'}">${s.status==='critical'?'วิกฤต':s.status==='warning'?'เฝ้าระวัง':s.status==='offline'?'ออฟไลน์':'ปกติ'}</span>
+      </div>
+      ${s.online?`<div class="sensor-bars">
+        <div class="bar-wrap"><div class="bar-label">ระดับน้ำ (Ultrasonic)</div><div class="bar-track"><div class="bar-fill" style="width:${s.water}%;background:${s.water>80?'var(--red)':s.water>50?'var(--yellow)':'var(--green)'}"></div></div><div class="bar-val">${s.water} ซม.</div></div>
+        <div class="bar-wrap"><div class="bar-label">ขยะอุดตัน (Infrared)</div><div class="bar-track"><div class="bar-fill" style="width:${s.debris}%;background:${s.debris>70?'var(--red)':s.debris>40?'var(--yellow)':'var(--green)'}"></div></div><div class="bar-val">${s.debris}%</div></div>
+      </div>
+      <button class="simulate-btn" onclick="simEvent('${s.id}',${s.water},${s.debris},this)"><i class="ti ti-player-play" aria-hidden="true"></i> จำลองเหตุการณ์</button>`:`<div style="text-align:center;padding:20px 0;color:var(--gray-text);font-size:12px"><i class="ti ti-wifi-off" aria-hidden="true"></i> ออฟไลน์ — ไม่มีสัญญาณ</div>`}
+    </div>`).join('');
+}
+
+function filterSensors(f,el){
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderSensors(f);
+}
+
+function simEvent(id,w,d,btn){
+  const newW=Math.min(100,w+Math.floor(Math.random()*20)+5);
+  const newD=Math.min(100,d+Math.floor(Math.random()*15)+5);
+  btn.textContent='⚡ กำลังส่งข้อมูล...';
+  btn.disabled=true;
+  setTimeout(()=>{
+    btn.textContent='✅ อัปเดตแล้ว ('+newW+' ซม.)';
+    const card=btn.closest('.sensor-card');
+    card.querySelectorAll('.bar-fill')[0].style.width=newW+'%';
+    card.querySelectorAll('.bar-val')[0].textContent=newW+' ซม.';
+    card.querySelectorAll('.bar-fill')[1].style.width=newD+'%';
+    card.querySelectorAll('.bar-val')[1].textContent=newD+'%';
+    if(newW>80){card.querySelector('.status-pill').className='status-pill pill-red';card.querySelector('.status-pill').textContent='วิกฤต'}
+    setTimeout(()=>{btn.textContent='จำลองเหตุการณ์';btn.disabled=false},2000);
+  },1200);
+}
+
+function renderAlerts(){
+  const list=document.getElementById('alert-list');
+  list.innerHTML=alerts.map(a=>`
+    <div class="alert-item alert-${a.type==='critical'?'red':a.type==='warning'?'yellow':'green'}" id="alert-${a.id}">
+      <div class="alert-icon">${a.type==='critical'?'🚨':a.type==='warning'?'⚠️':'✅'}</div>
+      <div class="alert-text">
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-desc">${a.desc}</div>
+        <div class="alert-time">${a.time}</div>
+      </div>
+      ${a.type!=='resolved'?`<button class="alert-action ${a.type==='critical'?'urgent':''}" onclick="dismissAlert('${a.id}')">ส่งหน่วย</button>`:''}
+    </div>`).join('');
+}
+
+function dismissAlert(id){
+  const el=document.getElementById('alert-'+id);
+  if(el){el.style.opacity='0.4';el.querySelector('.alert-action').textContent='✓ ส่งแล้ว';el.querySelector('.alert-action').disabled=true;}
+}
+function clearAlerts(){document.querySelectorAll('.alert-item').forEach(e=>{e.style.opacity='0.3';});document.getElementById('alert-count').textContent='0';}
+
+function renderHotspots(){
+  const body=document.getElementById('hotspot-body');
+  body.innerHTML=hotspots.map(h=>`<tr>
+    <td>${h.zone}</td><td>${h.district}</td>
+    <td><div class="progress-wrap"><div class="progress-bar"><div class="progress-fill ${h.status==='critical'?'pf-red':h.status==='warning'?'pf-yellow':'pf-green'}" style="width:${h.water}%"></div></div>${h.water} ซม.</div></td>
+    <td><span class="hotspot-badge ${h.status==='critical'?'hs-red':h.status==='warning'?'hs-yellow':'hs-green'}">${h.status==='critical'?'วิกฤต':h.status==='warning'?'เฝ้าระวัง':'ปกติ'}</span></td>
+    <td>${h.complaints} ครั้ง</td>
+    <td><button class="action-btn primary" onclick="dispatchTeam('${h.zone}')">ส่งหน่วย</button></td>
+  </tr>`).join('');
+}
+
+function dispatchTeam(z){alert('📡 ส่งหน่วยเคลื่อนที่เร็วไปยัง '+z+' แล้ว\nข้อความแจ้งเตือน LINE ถูกส่งถึงเจ้าหน้าที่');}
+
+function drawLine(svgId,data,color,strokeW){
+  const svg=document.getElementById(svgId);
+  if(!svg)return;
+  const W=560,H=svgId==='district-chart'?120:100;
+  const mx=Math.max(...data),mn=0;
+  const pts=data.map((v,i)=>`${i*(W/(data.length-1))},${H-10-(v-mn)/(mx-mn||1)*(H-20)}`).join(' ');
+  svg.innerHTML=`<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="${strokeW||1.5}" stroke-linejoin="round" stroke-linecap="round"/>
+  ${data.map((v,i)=>`<circle cx="${i*(W/(data.length-1))}" cy="${H-10-(v-mn)/(mx-mn||1)*(H-20)}" r="3" fill="${color}"/>
+  <text x="${i*(W/(data.length-1))}" y="${H-10-(v-mn)/(mx-mn||1)*(H-20)-8}" text-anchor="middle" style="font-size:9px;fill:var(--gray-text)">${v}</text>`).join('')}
+  <line x1="0" y1="${H-10}" x2="${W}" y2="${H-10}" stroke="var(--border)" stroke-width="0.5"/>`;
+}
+
+function renderCharts(){
+  const wData=[32,45,28,55,62,48,35,70,58,44,38,65];
+  const eData=[4,7,3,9,11,6,8,5,12,7,4,10];
+  drawLine('water-chart',wData,'#1a6fb5',2);
+  drawLine('event-chart',[5,8,12,6,14,9,11],'#e24b4a',2);
+  const distSvg=document.getElementById('district-chart');
+  if(distSvg){
+    const districts=['ลาดพร้าว','สาทร','พระโขนง','บางกะปิ','บึงกุ่ม','จตุจักร','พญาไท'];
+    const scores=[88,82,60,55,48,42,20];
+    const colors=scores.map(s=>s>70?'#e24b4a':s>45?'#ef9f27':'#27a06b');
+    distSvg.innerHTML=districts.map((d,i)=>`
+      <rect x="${i*80}" y="${120-scores[i]}" width="65" height="${scores[i]}" fill="${colors[i]}" rx="3" opacity="0.85"/>
+      <text x="${i*80+32}" y="118" text-anchor="middle" style="font-size:9px;fill:var(--gray-text)">${d}</text>
+      <text x="${i*80+32}" y="${115-scores[i]}" text-anchor="middle" style="font-size:9px;fill:${colors[i]}">${scores[i]}</text>`).join('');
+  }
+}
+
+function renderFirebaseLog(){
+  const log=document.getElementById('firebase-log');
+  const entries=[
+    `[${new Date().toLocaleTimeString('th-TH')}] ESP32-001 → {water:88,debris:92,ts:${Date.now()}}`,
+    `[${new Date().toLocaleTimeString('th-TH')}] ESP32-004 → {water:91,debris:85,ts:${Date.now()-3000}}`,
+    `[${new Date().toLocaleTimeString('th-TH')}] ESP32-007 → {water:82,debris:77,ts:${Date.now()-6000}}`,
+    `[${new Date().toLocaleTimeString('th-TH')}] ESP32-002 → {water:75,debris:60,ts:${Date.now()-9000}}`,
+    `[${new Date().toLocaleTimeString('th-TH')}] Firebase SYNC OK — 21 nodes active`,
+  ];
+  log.innerHTML=entries.map(e=>`<div>${e}</div>`).join('');
+}
+
+function toggleOpenData(){
+  openDataVisible=!openDataVisible;
+  const btn=document.getElementById('toggle-open-data');
+  const legend=document.getElementById('open-data-legend');
+  btn.classList.toggle('active-toggle',openDataVisible);
+  legend.style.display=openDataVisible?'flex':'none';
+  renderMapPins();
+}
+
+function renderMapPins(){
+  const g=document.getElementById('sensor-pins');
+  const onlineSensors=sensors.filter(s=>s.online);
+  let html=onlineSensors.map(s=>{
+    const c=s.status==='critical'?'#e24b4a':s.status==='warning'?'#ef9f27':'#27a06b';
+    return `<g class="sensor-pin" onclick="showTooltip(event,'${s.id}','${s.name}',${s.water},${s.debris},'${s.status}')" style="cursor:pointer">
+      <circle cx="${s.lat}" cy="${s.lng}" r="9" fill="${c}" opacity="0.3"/>
+      <circle cx="${s.lat}" cy="${s.lng}" r="5" fill="${c}"/>
+      ${s.status==='critical'?`<circle cx="${s.lat}" cy="${s.lng}" r="9" fill="none" stroke="${c}" stroke-width="1.5" opacity="0.6"><animate attributeName="r" from="6" to="14" dur="1.5s" repeatCount="indefinite"/><animate attributeName="opacity" from="0.8" to="0" dur="1.5s" repeatCount="indefinite"/></circle>`:''}
+    </g>`;
+  }).join('');
+  if(openDataVisible){
+    const floodPts=[[140,130],[250,185],[330,165],[400,195],[470,125],[130,215],[290,200]];
+    html+=floodPts.map(([x,y])=>`<rect x="${x-8}" y="${y-8}" width="16" height="16" rx="3" fill="#5B5EA6" opacity="0.6" stroke="#3d3a8a" stroke-width="0.5" style="cursor:pointer" onclick="alert('จุดน้ำท่วมซ้ำซาก (กทม. Open Data)\nร้องเรียน Traffy Fondue > 10 ครั้ง')"/>`).join('');
+  }
+  g.innerHTML=html;
+}
+
+const tooltip=document.getElementById('map-tooltip');
+function showTooltip(e,id,name,water,debris,status){
+  const c=document.getElementById('main-map-container').getBoundingClientRect();
+  const st=status==='critical'?'⛔ วิกฤต':status==='warning'?'⚠️ เฝ้าระวัง':'✅ ปกติ';
+  tooltip.innerHTML=`<div class="tt-name">${id} — ${name}</div><div class="tt-row"><span>ระดับน้ำ</span><span>${water} ซม.</span></div><div class="tt-row"><span>ขยะอุดตัน</span><span>${debris}%</span></div><div class="tt-row"><span>สถานะ</span><span>${st}</span></div>`;
+  tooltip.style.display='block';
+  const svgEl=document.querySelector('.map-svg');
+  const pt=e.target;
+  tooltip.style.left=Math.min(e.clientX-c.left+10,c.width-170)+'px';
+  tooltip.style.top=Math.min(e.clientY-c.top+10,c.height-100)+'px';
+  setTimeout(()=>{tooltip.style.display='none'},3000);
+}
+
+function refreshMap(){const btn=document.querySelector('.map-overlay .map-ctrl:nth-child(2)');btn.innerHTML='<i class="ti ti-loader" aria-hidden="true"></i> รีเฟรช';sensors.forEach(s=>{if(s.online&&Math.random()>.7){s.water=Math.max(5,Math.min(99,s.water+Math.round((Math.random()-.4)*12)));}});setTimeout(()=>{renderMapPins();btn.innerHTML='<i class="ti ti-refresh" aria-hidden="true"></i> รีเฟรช';},800);}
+
+function addSimSensor(){switchTab('settings');}
+function downloadReport(){alert('📄 กำลังสร้างไฟล์ PDF...\nBKK_MicroFlow_Report_'+new Date().toLocaleDateString('th-TH')+'.pdf\n\n(ฟีเจอร์นี้พร้อมใช้งานใน Production build)');}
+function saveSensor(){alert('✅ บันทึกเซนเซอร์ใหม่ลง Firebase แล้ว\nจะปรากฏในแผนที่ภายใน 30 วินาที');}
+function saveSettings(){alert('✅ บันทึกการตั้งค่าสำเร็จ\nระบบจะใช้ค่าใหม่ในการส่งแจ้งเตือนครั้งถัดไป');}
+
+function updateClock(){
+  document.getElementById('clock').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock,1000);
+updateClock();
+
+setInterval(()=>{
+  sensors.forEach(s=>{
+    if(s.online&&Math.random()>.85){
+      s.water=Math.max(5,Math.min(99,s.water+Math.round((Math.random()-.45)*8)));
+      s.debris=Math.max(5,Math.min(99,s.debris+Math.round((Math.random()-.45)*6)));
+    }
+  });
+  renderMapPins();
+},5000);
+
+renderMapPins();
+renderCharts();
+
+const wChartData=[32,45,28,55,62,48,35,70,58,44,38,65];
+setInterval(()=>{
+  wChartData.push(Math.round(20+Math.random()*60));
+  if(wChartData.length>12)wChartData.shift();
+  drawLine('water-chart',wChartData,'#1a6fb5',2);
+},4000);
+</script>

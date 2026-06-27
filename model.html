@@ -1,210 +1,1133 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BKK MicroFlow Digital Twin</title>
-  <style>
-    :root { color-scheme: dark; --cyan:#22d3ee; --red:#fb7185; --green:#34d399; --panel:rgba(8,13,28,.74); --line:rgba(148,163,184,.24); }
-    * { box-sizing: border-box; }
-    html, body { width:100%; height:100%; margin:0; overflow:hidden; background:#0f172a; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; letter-spacing:0; }
-    canvas { display:block; width:100%; height:100%; }
-    .tooltip { position:fixed; z-index:10; width:min(310px,calc(100vw - 32px)); padding:13px 14px; border:1px solid rgba(103,232,249,.28); border-radius:8px; background:var(--panel); box-shadow:0 24px 70px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.08); backdrop-filter:blur(18px); color:#e2e8f0; opacity:0; transform:translate3d(12px,12px,0) scale(.98); pointer-events:none; transition:opacity .16s ease, transform .16s ease; }
-    .tooltip.visible { opacity:1; transform:translate3d(12px,12px,0) scale(1); }
-    .tooltip h2 { margin:0 0 7px; color:#f8fafc; font-size:15px; line-height:1.2; }
-    .tooltip p { margin:0; color:rgba(203,213,225,.82); font-size:12px; line-height:1.45; }
-    .tooltip dl { display:grid; grid-template-columns:auto 1fr; gap:5px 10px; margin:11px 0 0; font-size:11px; }
-    .tooltip dt { color:rgba(148,163,184,.78); } .tooltip dd { margin:0; color:#e0f2fe; font-weight:700; }
-    .info-card { position:fixed; top:90px; right:24px; z-index:8; width:min(380px,calc(100vw - 48px)); max-height:calc(100vh - 140px); overflow:auto; border:1px solid var(--line); border-radius:8px; padding:18px; background:var(--panel); box-shadow:0 32px 86px rgba(0,0,0,.46), inset 0 1px 0 rgba(255,255,255,.08); backdrop-filter:blur(22px); color:#e2e8f0; opacity:0; transform:translateX(16px); pointer-events:none; transition:opacity .22s ease, transform .22s ease; }
-    .info-card.open { opacity:1; transform:translateX(0); pointer-events:auto; }
-    .info-card button { position:absolute; top:12px; right:12px; width:32px; height:32px; border:1px solid rgba(148,163,184,.22); border-radius:8px; background:rgba(15,23,42,.54); color:#e2e8f0; font-size:18px; cursor:pointer; }
-    .info-card h2 { margin:0 36px 8px 0; color:#f8fafc; font-size:22px; line-height:1.12; }
-    .status-pill { display:inline-flex; align-items:center; gap:7px; margin:0 0 14px; border:1px solid rgba(52,211,153,.3); border-radius:999px; padding:6px 10px; background:rgba(20,184,166,.12); color:#a7f3d0; font-size:12px; font-weight:800; }
-    .dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 16px var(--green); }
-    .info-card h3 { margin:16px 0 7px; color:#bae6fd; font-size:12px; text-transform:uppercase; } .info-card p,.info-card li { color:rgba(226,232,240,.82); font-size:13px; line-height:1.55; } .info-card p { margin:0; } .info-card ul { margin:0; padding-left:18px; }
-    .help-button { position:fixed; right:24px; bottom:24px; z-index:9; width:46px; height:46px; border:1px solid rgba(103,232,249,.34); border-radius:50%; background:rgba(8,13,28,.72); box-shadow:0 18px 56px rgba(0,0,0,.4),0 0 30px rgba(34,211,238,.16); color:#cffafe; font-size:24px; font-weight:800; cursor:pointer; backdrop-filter:blur(16px); }
-    .guide { position:fixed; right:24px; bottom:82px; z-index:9; width:min(300px,calc(100vw - 48px)); border:1px solid var(--line); border-radius:8px; padding:15px; background:var(--panel); box-shadow:0 24px 70px rgba(0,0,0,.42); backdrop-filter:blur(20px); color:#e2e8f0; opacity:0; transform:translateY(12px); pointer-events:none; transition:opacity .2s ease, transform .2s ease; }
-    .guide.open { opacity:1; transform:translateY(0); pointer-events:auto; } .guide h2 { margin:0 0 10px; font-size:15px; } .guide dl { display:grid; grid-template-columns:92px 1fr; gap:8px 10px; margin:0; font-size:12px; } .guide dt { color:#bae6fd; font-weight:800; } .guide dd { margin:0; color:rgba(226,232,240,.8); }
-    .loading { position:fixed; inset:0; z-index:20; display:grid; place-items:center; background:#0f172a; color:#e2e8f0; transition:opacity .3s ease, visibility .3s ease; } .loading.hidden { opacity:0; visibility:hidden; } .loader-mark { width:54px; height:54px; margin:0 auto 16px; border:3px solid rgba(34,211,238,.18); border-top-color:#22d3ee; border-radius:50%; animation:spin .8s linear infinite; } @keyframes spin { to { transform:rotate(360deg); } }
-    @media (max-width:720px) { .info-card{top:72px;right:12px;width:calc(100vw - 24px)}.help-button{right:14px;bottom:24px}.guide{right:12px;bottom:78px} }
-  </style>
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.164.1/build/three.module.js"
-      }
-    }
-  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BKK-MicroFlow — IoT Drain Monitoring Device</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #1a2232;
+    --accent: #00d4ff;
+    --accent2: #0088cc;
+    --green: #00ff88;
+    --amber: #ffaa00;
+    --red: #ff4444;
+    --text: #e8f4ff;
+    --muted: #6a8aaa;
+    --border: rgba(0,212,255,0.15);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ---- HERO ---- */
+  #hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  #canvas-container {
+    position: absolute;
+    inset: 0;
+  }
+
+  #canvas-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .hero-ui {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    gap: 12px;
+    pointer-events: all;
+  }
+
+  .btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: #33ddff; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text);
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+  /* drag hint */
+  .drag-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    color: var(--muted);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: float 2.5s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-6px); }
+  }
+
+  /* exploded panel */
+  #explode-bar {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .comp-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 180px;
+  }
+
+  .comp-btn:hover { border-color: var(--accent); background: var(--surface2); }
+  .comp-btn.active { border-color: var(--accent); background: rgba(0,212,255,0.08); }
+
+  .comp-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* info panel */
+  #info-panel {
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    width: 220px;
+    background: rgba(17,23,32,0.85);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    backdrop-filter: blur(12px);
+    display: none;
+  }
+
+  #info-panel.visible { display: block; }
+
+  .info-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .info-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .info-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .info-spec {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .spec-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    padding: 3px 0;
+    color: var(--muted);
+  }
+
+  .spec-val {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ---- SPECS SECTION ---- */
+  #specs {
+    padding: 80px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 48px;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .spec-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .spec-card:hover { border-color: rgba(0,212,255,0.4); }
+
+  .spec-card-icon {
+    width: 36px; height: 36px;
+    background: rgba(0,212,255,0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+
+  .spec-card-name {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .spec-card-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .spec-card-unit {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  /* flow diagram */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .flow-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .flow-node-icon { font-size: 22px; margin-bottom: 4px; }
+  .flow-node-label { font-size: 12px; font-weight: 600; color: var(--text); }
+  .flow-node-sub { font-size: 10px; color: var(--muted); }
+
+  .flow-arrow {
+    color: var(--accent);
+    font-size: 18px;
+    margin: 0 8px;
+    opacity: 0.7;
+  }
+
+  /* status strip */
+  .status-strip {
+    display: flex;
+    gap: 12px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  .pill-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .footer-logo {
+    font-weight: 800;
+    color: var(--accent);
+    font-size: 16px;
+  }
+
+  /* tooltip */
+  #tooltip {
+    position: absolute;
+    background: rgba(17,23,32,0.95);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 30;
+    display: none;
+    backdrop-filter: blur(8px);
+    max-width: 160px;
+  }
+
+  .tooltip-name { font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+  .tooltip-desc { color: var(--muted); font-size: 11px; }
+
+  #reset-btn {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    z-index: 20;
+    background: rgba(17,23,32,0.8);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s;
+  }
+
+  #reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .explode-toggle {
+    position: absolute;
+    bottom: 90px;
+    right: 24px;
+    z-index: 20;
+    background: rgba(17,23,32,0.8);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s;
+  }
+
+  .explode-toggle:hover { border-color: var(--accent); }
+  .explode-toggle.on { border-color: var(--accent); background: rgba(0,212,255,0.1); color: var(--accent); }
+</style>
 </head>
 <body>
-  <div class="loading" id="loading"><div><div class="loader-mark"></div><strong>Starting BKK MicroFlow digital twin</strong></div></div>
-  <aside class="tooltip" id="tooltip" role="status" aria-live="polite"></aside>
-  <section class="info-card" id="infoCard"><button type="button" id="closeInfo" aria-label="Close details">×</button><div id="infoContent"></div></section>
-  <button class="help-button" type="button" id="helpButton" aria-label="Open interaction guide">?</button>
-  <section class="guide" id="guide"><h2>Interaction Guide</h2><dl><dt>Hover</dt><dd>Inspect equipment and status.</dd><dt>Click</dt><dd>Focus camera and open details.</dd><dt>Scroll</dt><dd>Zoom in and out.</dd><dt>Right Mouse</dt><dd>Pan around the prototype.</dd><dt>Double Click</dt><dd>Reset camera view.</dd></dl></section>
 
-  <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.164.1/build/three.module.js';
-    import { OrbitControls } from 'https://unpkg.com/three@0.164.1/examples/jsm/controls/OrbitControls.js';
-    import { EffectComposer } from 'https://unpkg.com/three@0.164.1/examples/jsm/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'https://unpkg.com/three@0.164.1/examples/jsm/postprocessing/RenderPass.js';
-    import { UnrealBloomPass } from 'https://unpkg.com/three@0.164.1/examples/jsm/postprocessing/UnrealBloomPass.js';
+<!-- ═══════════════════════════ HERO ═══════════════════════════ -->
+<section id="hero">
+  <div id="canvas-container"></div>
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#0f172a');
-    scene.fog = new THREE.Fog('#0f172a', 14, 34);
-    const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, .1, 100);
-    camera.position.set(5.8, 4.3, 7.2);
-    const renderer = new THREE.WebGLRenderer({ antialias:true });
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    document.body.appendChild(renderer.domElement);
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), .42, .48, .78);
-    composer.addPass(bloomPass);
+  <div class="hero-ui">
+    <button class="btn btn-primary" onclick="toggleExplode()">🔍 แงะดูข้างใน</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('specs').scrollIntoView({behavior:'smooth'})">ดูสเปค ↓</button>
+  </div>
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = .065;
-    controls.enableZoom = controls.enableRotate = controls.enablePan = true;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = .42;
-    controls.target.set(0, 1.15, 0);
-    const stopAutoRotate = () => { controls.autoRotate = false; };
-    ['pointerdown','wheel','keydown','touchstart'].forEach(e => addEventListener(e, stopAutoRotate, { passive:true }));
+  <div class="drag-hint">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
+    ลากเพื่อหมุน · เลื่อน scroll เพื่อ zoom
+  </div>
 
-    scene.add(new THREE.AmbientLight('#b7d7ff', .44));
-    const key = new THREE.DirectionalLight('#e0f2fe', 2.6);
-    key.position.set(4.5, 7, 4.5); key.castShadow = true; key.shadow.mapSize.set(2048,2048);
-    Object.assign(key.shadow.camera, { near:1, far:18, left:-7, right:7, top:7, bottom:-7 });
-    scene.add(key);
-    const fill = new THREE.DirectionalLight('#60a5fa', .9); fill.position.set(-5, 4, -3); scene.add(fill);
-    const rim = new THREE.PointLight('#22d3ee', 1.8, 10); rim.position.set(-3.2, 2.2, 2.4); scene.add(rim);
+  <!-- component selector -->
+  <div id="explode-bar">
+    <div style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">ส่วนประกอบ</div>
+    <button class="comp-btn" onclick="highlightPart('box')" id="btn-box">
+      <span class="comp-dot" style="background:#4488cc"></span> กล่องอุปกรณ์
+    </button>
+    <button class="comp-btn" onclick="highlightPart('esp32')" id="btn-esp32">
+      <span class="comp-dot" style="background:#22cc66"></span> ESP32 Board
+    </button>
+    <button class="comp-btn" onclick="highlightPart('ultrasonic')" id="btn-ultrasonic">
+      <span class="comp-dot" style="background:#ffaa00"></span> Ultrasonic Sensor
+    </button>
+    <button class="comp-btn" onclick="highlightPart('ir')" id="btn-ir">
+      <span class="comp-dot" style="background:#ff4466"></span> IR Sensor
+    </button>
+    <button class="comp-btn" onclick="highlightPart('battery')" id="btn-battery">
+      <span class="comp-dot" style="background:#aa66ff"></span> Powerbank
+    </button>
+    <button class="comp-btn" onclick="highlightPart('antenna')" id="btn-antenna">
+      <span class="comp-dot" style="background:#00d4ff"></span> Wi-Fi Antenna
+    </button>
+  </div>
 
-    const mat = {
-      acrylic:new THREE.MeshPhysicalMaterial({ color:'#dbeafe', transparent:true, opacity:.38, roughness:.08, metalness:.05, transmission:.38, thickness:.32, clearcoat:1, side:THREE.DoubleSide }),
-      acrylicEdge:new THREE.MeshStandardMaterial({ color:'#bfdbfe', transparent:true, opacity:.34, roughness:.12, emissive:'#0e7490', emissiveIntensity:.08 }),
-      water:new THREE.MeshPhysicalMaterial({ color:'#38bdf8', transparent:true, opacity:.56, roughness:.16, transmission:.12, clearcoat:.75, side:THREE.DoubleSide }),
-      green:new THREE.MeshStandardMaterial({ color:'#047857', roughness:.48 }), blue:new THREE.MeshStandardMaterial({ color:'#1d4ed8', roughness:.45 }),
-      chip:new THREE.MeshStandardMaterial({ color:'#111827', roughness:.42 }), pin:new THREE.MeshStandardMaterial({ color:'#fbbf24', roughness:.24, metalness:.7 }),
-      metal:new THREE.MeshStandardMaterial({ color:'#cbd5e1', roughness:.2, metalness:.86 }), floor:new THREE.MeshStandardMaterial({ color:'#111827', roughness:.34, metalness:.18 }),
-      rubber:new THREE.MeshStandardMaterial({ color:'#020617', roughness:.58 }), leaf:new THREE.MeshStandardMaterial({ color:'#7c4a21', roughness:.72 }),
-      trash:new THREE.MeshStandardMaterial({ color:'#475569', roughness:.66 }), rock:new THREE.MeshStandardMaterial({ color:'#334155', roughness:.82 }),
-      cyanGlow:new THREE.MeshBasicMaterial({ color:'#22d3ee', transparent:true, opacity:.23, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide }),
-      redGlow:new THREE.MeshBasicMaterial({ color:'#fb7185', transparent:true, opacity:.3, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide })
-    };
-    const box = new THREE.BoxGeometry(1,1,1), sphere = new THREE.SphereGeometry(1,24,16), smallSphere = new THREE.SphereGeometry(.035,12,8), cyl = new THREE.CylinderGeometry(1,1,1,40), cone = new THREE.ConeGeometry(1,1,48,1,true);
-    const leafShape = new THREE.Shape(); leafShape.moveTo(0,.18); leafShape.bezierCurveTo(.22,.1,.22,-.12,0,-.2); leafShape.bezierCurveTo(-.22,-.12,-.22,.1,0,.18);
-    const leafGeo = new THREE.ShapeGeometry(leafShape);
-    const interactive = [], animated = [], relationshipLines = [], dataParticles = [];
-    const highlightMaterial = new THREE.MeshBasicMaterial({ color:'#67e8f9', transparent:true, opacity:.22, blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide });
-    const liveValues = { water:42, distance:18.3, debris:'Detected', temp:29, wifi:'Connected' };
+  <button id="reset-btn" onclick="resetView()">↺ รีเซ็ตมุมมอง</button>
 
-    function cube(size, pos, material, cast=true, receive=true) { const m = new THREE.Mesh(box, material); m.scale.copy(size); m.position.copy(pos); m.castShadow = cast; m.receiveShadow = receive; return m; }
-    function cylinder(radius, depth, pos, material, rot=new THREE.Euler()) { const m = new THREE.Mesh(cyl, material); m.scale.set(radius, depth, radius); m.position.copy(pos); m.rotation.copy(rot); m.castShadow = m.receiveShadow = true; return m; }
-    function highlightFor(root) { const g = new THREE.Group(), glow = new THREE.Mesh(box, highlightMaterial); g.add(glow); g.userData.update = () => { const b = new THREE.Box3().setFromObject(root), s = new THREE.Vector3(), c = new THREE.Vector3(); b.getSize(s); b.getCenter(c); g.position.copy(c); glow.scale.copy(s.multiplyScalar(1.16)); }; return g; }
-    function addInteractive(root, hitMeshes, metadata, focusOffset) { root.userData.metadata = metadata; root.userData.focusOffset = focusOffset; root.userData.baseScale = root.scale.clone(); root.userData.highlight = highlightFor(root); root.userData.highlight.visible = false; scene.add(root.userData.highlight); hitMeshes.forEach(m => { m.userData.owner = root; interactive.push(m); }); return root; }
+  <button class="explode-toggle" id="explode-btn" onclick="toggleExplode()">📦 ปิด/เปิด กล่อง</button>
 
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(9,96), mat.floor); floor.rotation.x = -Math.PI/2; floor.position.y = -.05; floor.receiveShadow = true; scene.add(floor);
-    const grid = new THREE.GridHelper(13,26,'#164e63','#1e293b'); grid.position.y = -.035; grid.material.transparent = true; grid.material.opacity = .18; scene.add(grid);
+  <div id="info-panel">
+    <div class="info-label" id="ip-label">Component</div>
+    <div class="info-title" id="ip-title">—</div>
+    <div class="info-desc" id="ip-desc">—</div>
+    <div class="info-spec" id="ip-spec"></div>
+  </div>
 
-    const chamber = new THREE.Group(), chamberHits = [];
-    [cube(new THREE.Vector3(4.2,1.85,.06),new THREE.Vector3(0,.92,-1.05),mat.acrylic), cube(new THREE.Vector3(4.2,1.85,.06),new THREE.Vector3(0,.92,1.05),mat.acrylic), cube(new THREE.Vector3(.06,1.85,2.1),new THREE.Vector3(-2.1,.92,0),mat.acrylic), cube(new THREE.Vector3(.06,1.85,2.1),new THREE.Vector3(2.1,.92,0),mat.acrylic), cube(new THREE.Vector3(4.25,.08,2.14),new THREE.Vector3(0,.04,0),mat.acrylic)].forEach(p => { chamber.add(p); chamberHits.push(p); });
-    [[0,1.88,-1.08,4.35,.08,.08],[0,1.88,1.08,4.35,.08,.08],[-2.18,1.88,0,.08,.08,2.2],[2.18,1.88,0,.08,.08,2.2],[0,.08,-1.08,4.35,.08,.08],[0,.08,1.08,4.35,.08,.08]].forEach(r => chamber.add(cube(new THREE.Vector3(r[3],r[4],r[5]),new THREE.Vector3(r[0],r[1],r[2]),mat.acrylicEdge)));
-    scene.add(chamber);
-    addInteractive(chamber, chamberHits, meta('Transparent Acrylic Drainage Chamber','A clear street-drain prototype box that makes water level, debris, and sensor placement visible during the demo.','Physical mockup for Bangkok side-street drainage monitoring.','The transparent chamber represents the drainage channel under a manhole cover and lets judges see blockage behavior directly.','Demo ready','Tabletop prototype',['Transparent acrylic body','Removable top access','Sized for ESP32 sensor demo'],()=>'Water flow simulated'), new THREE.Vector3(3,1.8,3.2));
+  <div id="tooltip">
+    <div class="tooltip-name" id="tt-name"></div>
+    <div class="tooltip-desc" id="tt-desc"></div>
+  </div>
+</section>
 
-    const waterGeo = new THREE.PlaneGeometry(4.02,1.9,64,20); waterGeo.rotateX(-Math.PI/2);
-    const water = new THREE.Mesh(waterGeo, mat.water); water.position.y = .76; water.receiveShadow = true; scene.add(water); animated.push({ type:'water', mesh:water, geometry:waterGeo });
-    const waterVolume = cube(new THREE.Vector3(4,.62,1.86),new THREE.Vector3(0,.43,0),mat.water.clone(),false,true); waterVolume.material.opacity = .22; scene.add(waterVolume);
-    addInteractive(waterVolume, [waterVolume], meta('Animated Water Level','Transparent water volume with ripple motion, bubbles, and live level simulation.','Shows rising water when the drain starts clogging.','The HC-SR04 distance reading is interpreted as water height percentage.','Fluctuating','0-100%',['Current level simulation','Rippled surface','Bubble indicators'],()=>`${liveValues.water}% full`), new THREE.Vector3(2.6,1.2,2.4));
-    for (let i=0;i<36;i++) { const b = new THREE.Mesh(smallSphere,new THREE.MeshBasicMaterial({ color:'#bae6fd', transparent:true, opacity:.32+Math.random()*.32, depthWrite:false })); b.position.set(THREE.MathUtils.randFloatSpread(3.5),THREE.MathUtils.randFloat(.16,.78),THREE.MathUtils.randFloatSpread(1.48)); b.scale.setScalar(THREE.MathUtils.randFloat(.65,1.7)); scene.add(b); animated.push({ type:'bubble', mesh:b, speed:THREE.MathUtils.randFloat(.14,.36), startY:b.position.y }); }
+<!-- ═══════════════════════════ SPECS ═══════════════════════════ -->
+<section id="specs">
+  <div class="section-label">Hardware Specifications</div>
+  <div class="section-title">ทุกชิ้นส่วนที่ทำให้<br>ระบบทำงานได้จริง</div>
 
-    const debris = new THREE.Group(), debrisHits = [];
-    for (let i=0;i<22;i++) { const l = new THREE.Mesh(leafGeo, mat.leaf); l.position.set(THREE.MathUtils.randFloat(-.9,1.65),.84+i*.002,THREE.MathUtils.randFloat(-.58,.58)); l.rotation.set(-Math.PI/2+THREE.MathUtils.randFloat(-.25,.25),THREE.MathUtils.randFloatSpread(.4),THREE.MathUtils.randFloat(0,Math.PI*2)); l.scale.setScalar(THREE.MathUtils.randFloat(.55,1.08)); l.castShadow = true; debris.add(l); debrisHits.push(l); }
-    for (let i=0;i<13;i++) { const t = cube(new THREE.Vector3(THREE.MathUtils.randFloat(.12,.32),THREE.MathUtils.randFloat(.06,.18),THREE.MathUtils.randFloat(.12,.28)),new THREE.Vector3(THREE.MathUtils.randFloat(-.65,1.55),.84,THREE.MathUtils.randFloat(-.58,.58)),mat.trash); t.rotation.set(THREE.MathUtils.randFloatSpread(.8),THREE.MathUtils.randFloatSpread(.8),THREE.MathUtils.randFloatSpread(.8)); debris.add(t); debrisHits.push(t); }
-    for (let i=0;i<15;i++) { const r = new THREE.Mesh(new THREE.IcosahedronGeometry(THREE.MathUtils.randFloat(.055,.12),1), mat.rock); r.position.set(THREE.MathUtils.randFloat(-.7,1.7),.82,THREE.MathUtils.randFloat(-.62,.62)); r.castShadow = r.receiveShadow = true; debris.add(r); debrisHits.push(r); }
-    scene.add(debris);
-    addInteractive(debris, debrisHits, meta('Debris and Sediment Pile','Leaves, plastic blocks, and small rocks represent the waste that causes localized flooding in Bangkok side streets.','Create a visible clogging condition for the sensor demo.','The IR module flags nearby obstruction while water level rise confirms drainage risk.','Clogging risk','Accumulating',['Leaves','Trash fragments','Sediment and rocks'],()=>liveValues.debris), new THREE.Vector3(1.6,1,1.8));
+  <div class="cards-grid">
+    <div class="spec-card">
+      <div class="spec-card-icon">🔲</div>
+      <div class="spec-card-name">Microcontroller</div>
+      <div class="spec-card-val">ESP32</div>
+      <div class="spec-card-unit">240 MHz Dual-core</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-icon">📡</div>
+      <div class="spec-card-name">Ultrasonic Range</div>
+      <div class="spec-card-val">2–400 <span class="spec-card-unit">cm</span></div>
+      <div class="spec-card-unit">±1 cm accuracy</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-icon">🔴</div>
+      <div class="spec-card-name">IR Detection</div>
+      <div class="spec-card-val">2–30 <span class="spec-card-unit">cm</span></div>
+      <div class="spec-card-unit">Obstacle / debris</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-icon">📶</div>
+      <div class="spec-card-name">Connectivity</div>
+      <div class="spec-card-val">Wi-Fi</div>
+      <div class="spec-card-unit">2.4 GHz 802.11 b/g/n</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-icon">🔋</div>
+      <div class="spec-card-name">Power</div>
+      <div class="spec-card-val">5V</div>
+      <div class="spec-card-unit">Powerbank / USB</div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-icon">💰</div>
+      <div class="spec-card-name">Est. Cost</div>
+      <div class="spec-card-val">~500 <span class="spec-card-unit">฿</span></div>
+      <div class="spec-card-unit">per unit</div>
+    </div>
+  </div>
 
-    const esp32 = new THREE.Group(); esp32.position.set(-.88,2.28,-.2); esp32.rotation.x = -.08;
-    const espBoard = cube(new THREE.Vector3(1.18,.065,.72),new THREE.Vector3(0,0,0),mat.green); esp32.add(espBoard);
-    [cube(new THREE.Vector3(.38,.08,.28),new THREE.Vector3(-.1,.08,0),mat.chip), cube(new THREE.Vector3(.22,.07,.16),new THREE.Vector3(.36,.075,.2),mat.chip), cube(new THREE.Vector3(.22,.085,.3),new THREE.Vector3(-.68,.07,0),mat.metal), cube(new THREE.Vector3(.36,.02,.18),new THREE.Vector3(.42,.086,-.22),new THREE.MeshStandardMaterial({ color:'#a7f3d0', roughness:.38, metalness:.12 }))].forEach(p => esp32.add(p));
-    for (let row=-1;row<=1;row+=2) for (let i=0;i<9;i++) esp32.add(cube(new THREE.Vector3(.028,.07,.028),new THREE.Vector3(-.46+i*.105,.085,row*.31),mat.pin));
-    scene.add(esp32);
-    addInteractive(esp32, [espBoard], meta('ESP32 Controller','Collects ultrasonic and infrared readings, filters noisy values, and sends the payload to Firebase over WiFi.','Central IoT controller for the MicroFlow node.','Reads GPIO signals from sensors, applies moving-average filtering, then publishes live status to the cloud.','Online','WiFi connected',['Communication: WiFi','Destination: Firebase Realtime Database','Fallback: local mock input'],()=>`WiFi ${liveValues.wifi}`), new THREE.Vector3(2,1.2,2));
+  <!-- Data flow -->
+  <div class="section-label" style="margin-top:48px">Data Flow</div>
+  <div class="section-title" style="font-size:clamp(22px,3vw,32px);margin-bottom:24px">จากเซนเซอร์ถึงแดชบอร์ด</div>
+  <div class="flow">
+    <div class="flow-node">
+      <div class="flow-node-icon">📡</div>
+      <div class="flow-node-label">Sensors</div>
+      <div class="flow-node-sub">HC-SR04 + IR</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-node-icon">🔲</div>
+      <div class="flow-node-label">ESP32</div>
+      <div class="flow-node-sub">Process + Filter</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-node-icon">📶</div>
+      <div class="flow-node-label">Wi-Fi / MQTT</div>
+      <div class="flow-node-sub">HTTP POST</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-node-icon">🔥</div>
+      <div class="flow-node-label">Firebase</div>
+      <div class="flow-node-sub">Realtime DB</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node">
+      <div class="flow-node-icon">🗺️</div>
+      <div class="flow-node-label">Dashboard</div>
+      <div class="flow-node-sub">React + Leaflet</div>
+    </div>
+  </div>
 
-    const ultrasonic = new THREE.Group(); ultrasonic.position.set(-.15,2.05,.62);
-    const ultraBoard = cube(new THREE.Vector3(.84,.055,.34),new THREE.Vector3(0,0,0),mat.blue), trA = cylinder(.13,.16,new THREE.Vector3(-.22,-.03,.02),mat.metal,new THREE.Euler(Math.PI/2,0,0)), trB = cylinder(.13,.16,new THREE.Vector3(.22,-.03,.02),mat.metal,new THREE.Euler(Math.PI/2,0,0));
-    ultrasonic.add(ultraBoard,trA,trB); for (let i=0;i<4;i++) ultrasonic.add(cube(new THREE.Vector3(.035,.09,.035),new THREE.Vector3(-.33+i*.08,.07,-.13),mat.pin)); scene.add(ultrasonic);
-    addInteractive(ultrasonic, [ultraBoard,trA,trB], meta('HC-SR04 Ultrasonic Sensor','Measures the distance to the water surface inside the drainage chamber.','Flood detection and water-level monitoring.','Emits a 40 kHz sound pulse and calculates distance from echo return time.','Online','2-400 cm',['Accuracy: ±3 mm','Frequency: 40 kHz','Mounted facing downward'],()=>`${liveValues.distance.toFixed(1)} cm`), new THREE.Vector3(1.6,1.1,1.7));
+  <div class="status-strip">
+    <div class="status-pill">
+      <div class="pill-dot" style="background:var(--green)"></div>
+      ปกติ — ระดับน้ำต่ำ
+    </div>
+    <div class="status-pill">
+      <div class="pill-dot" style="background:var(--amber)"></div>
+      เสี่ยงอุดตัน — ขยะสะสม
+    </div>
+    <div class="status-pill">
+      <div class="pill-dot" style="background:var(--red)"></div>
+      วิกฤต — อุดตัน/น้ำท่วม
+    </div>
+  </div>
+</section>
 
-    const ir = new THREE.Group(); ir.position.set(1.38,1.42,.82); ir.rotation.y = -.72;
-    const irBoard = cube(new THREE.Vector3(.52,.055,.32),new THREE.Vector3(0,0,0),mat.blue), emitter = cylinder(.055,.1,new THREE.Vector3(-.13,.02,-.18),new THREE.MeshStandardMaterial({ color:'#f8fafc', roughness:.18, metalness:.18, emissive:'#fb7185', emissiveIntensity:.18 }),new THREE.Euler(Math.PI/2,0,0)), receiver = cylinder(.055,.1,new THREE.Vector3(.13,.02,-.18),mat.rubber,new THREE.Euler(Math.PI/2,0,0));
-    ir.add(irBoard,emitter,receiver); scene.add(ir);
-    addInteractive(ir, [irBoard,emitter,receiver], meta('IR Sensor Module','Detects nearby debris and blockage inside the drainage pipe.','Debris obstruction detection.','Infrared light reflects from nearby objects; a strong reflection indicates blockage.','Active','2-30 cm',['Emitter and receiver pair','Faces debris pile','Fast binary blockage signal'],()=>liveValues.debris), new THREE.Vector3(1.45,.95,1.6));
+<footer>
+  <div class="footer-logo">BKK-MicroFlow</div>
+  <div>HacKaTech 2025 · URBAN Track · Team Inwzaบดินทร2_007</div>
+</footer>
 
-    const cloud = new THREE.Group(); cloud.position.set(-2.95,2.25,1.42);
-    const cloudCore = new THREE.Mesh(sphere,new THREE.MeshStandardMaterial({ color:'#f59e0b', roughness:.35, emissive:'#f97316', emissiveIntensity:.18 })); cloudCore.scale.set(.26,.16,.18); cloud.add(cloudCore,cube(new THREE.Vector3(.58,.18,.16),new THREE.Vector3(0,-.1,0),new THREE.MeshStandardMaterial({ color:'#f97316', roughness:.4, emissive:'#f59e0b', emissiveIntensity:.12 }))); scene.add(cloud);
-    addInteractive(cloud, [cloudCore], meta('Firebase Cloud','Receives ESP32 payloads for the hackathon demo and syncs live values to the web dashboard.','Realtime database layer.','Sensor payloads are pushed through WiFi and streamed to the front-end view.','Receiving packets','Cloud sync',['Realtime status updates','No custom server required','Demo-friendly fallback to mock data'],()=>'Last packet < 1s'), new THREE.Vector3(1.3,.9,1.5));
+<!-- ═══════════════════════════ THREE.JS ═══════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ── Scene Setup ──────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+const W = container.clientWidth, H = container.clientHeight;
 
-    const dash = new THREE.Group(); dash.position.set(-3.55,1.18,-1); dash.rotation.y = .44;
-    const screen = cube(new THREE.Vector3(.72,.46,.035),new THREE.Vector3(0,0,0),new THREE.MeshStandardMaterial({ color:'#020617', roughness:.24, metalness:.18, emissive:'#0ea5e9', emissiveIntensity:.08 }));
-    dash.add(screen); ['#22c55e','#fbbf24','#ef4444'].forEach((color,i)=>dash.add(cube(new THREE.Vector3(.08,.08,.012),new THREE.Vector3(-.22+i*.21,.05,.035),new THREE.MeshBasicMaterial({ color }),false,false))); dash.add(cube(new THREE.Vector3(.58,.025,.012),new THREE.Vector3(0,-.13,.036),new THREE.MeshBasicMaterial({ color:'#38bdf8' }),false,false)); scene.add(dash);
-    addInteractive(dash, [screen], meta('Realtime Dashboard','Represents the map dashboard where city staff see green, yellow, or red drain markers without refreshing.','Operations view for district staff.','Firebase updates drive map marker color and alert status in real time.','Critical risk visible','Bangkok district view',['Green/yellow/red markers','Open data overlay concept','Staff dispatch support'],()=>liveValues.debris==='Detected'?'Red marker active':'Green marker normal'), new THREE.Vector3(1.4,1,1.5));
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(W, H);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
 
-    function beam(type,start,end,radius,material) { const d = new THREE.Vector3().subVectors(end,start), m = new THREE.Mesh(cone, material.clone()); m.position.copy(new THREE.Vector3().addVectors(start,end).multiplyScalar(.5)); m.scale.set(radius,d.length(),radius); m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize()); scene.add(m); animated.push({ type, mesh:m, baseOpacity:material.opacity, speed:type==='irbeam'?3.8:2.5 }); return m; }
-    beam('ultrabeam',new THREE.Vector3(-.15,1.92,.62),new THREE.Vector3(-.15,.8,.62),.32,mat.cyanGlow);
-    beam('irbeam',new THREE.Vector3(1.22,1.35,.68),new THREE.Vector3(.8,.88,.18),.16,mat.redGlow);
-    function line(start,end,color) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([start,end]),new THREE.LineBasicMaterial({ color, transparent:true, opacity:.32 })); l.visible = false; scene.add(l); relationshipLines.push(l); }
-    line(ultrasonic.position,esp32.position,'#67e8f9'); line(ir.position,esp32.position,'#fb7185'); line(esp32.position,cloud.position,'#fbbf24'); line(cloud.position,dash.position,'#22d3ee');
-    function particlePath(points,color,count,speed) { const path = new THREE.CatmullRomCurve3(points); for (let i=0;i<count;i++) { const p = new THREE.Mesh(smallSphere,new THREE.MeshBasicMaterial({ color, transparent:true, opacity:.88, blending:THREE.AdditiveBlending, depthWrite:false })); p.scale.setScalar(1.5); scene.add(p); dataParticles.push({ mesh:p, path, t:i/count, speed }); } }
-    particlePath([ir.position.clone(),new THREE.Vector3(.7,1.9,.35),esp32.position.clone(),cloud.position.clone(),dash.position.clone()],'#fb7185',18,.075);
-    particlePath([ultrasonic.position.clone(),new THREE.Vector3(-.42,2.18,.26),esp32.position.clone(),cloud.position.clone(),dash.position.clone()],'#67e8f9',18,.068);
-    for (let i=0;i<16;i++) { const p = new THREE.Mesh(smallSphere,new THREE.MeshBasicMaterial({ color:i<8?'#67e8f9':'#fb7185', transparent:true, opacity:.88, blending:THREE.AdditiveBlending, depthWrite:false })); p.scale.setScalar(THREE.MathUtils.randFloat(.9,1.4)); scene.add(p); animated.push({ type:i<8?'ultraParticle':'irParticle', mesh:p, t:(i%8)/8, speed:i<8?.48:.72 }); }
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e14);
+scene.fog = new THREE.Fog(0x0a0e14, 30, 80);
 
-    function meta(name,description,purpose,principle,status,range,specs,reading) { return { name, description, purpose, principle, status, range, specs, reading }; }
-    const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2(), tooltip = document.getElementById('tooltip'), infoCard = document.getElementById('infoCard'), infoContent = document.getElementById('infoContent');
-    let hovered = null, selected = null, focusAnimation = null;
-    const defaultCamera = { position:new THREE.Vector3(5.8,4.3,7.2), target:new THREE.Vector3(0,1.15,0) };
-    function owner(o) { return o?.userData?.owner || o; }
-    function setHovered(next) { if (hovered === next) return; if (hovered) { hovered.userData.highlight.visible = false; hovered.scale.copy(hovered.userData.baseScale); relationshipLines.forEach(l=>l.visible=false); } hovered = next; if (hovered) { hovered.userData.highlight.userData.update(); hovered.userData.highlight.visible = true; hovered.scale.copy(hovered.userData.baseScale).multiplyScalar(1.035); if (hovered === esp32) relationshipLines.forEach(l=>l.visible=true); } }
-    function tip(m) { return `<h2>${m.name}</h2><p>${m.description}</p><dl><dt>Status</dt><dd>${m.status}</dd><dt>Range</dt><dd>${m.range}</dd><dt>Reading</dt><dd>${m.reading()}</dd></dl>`; }
-    function focusCamera(o) { stopAutoRotate(); const b = new THREE.Box3().setFromObject(o), c = new THREE.Vector3(); b.getCenter(c); focusAnimation = { startTime:performance.now(), duration:900, fromPosition:camera.position.clone(), toPosition:c.clone().add(o.userData.focusOffset || new THREE.Vector3(2,1.3,2)), fromTarget:controls.target.clone(), toTarget:c }; }
-    function openInfo(o) { selected = o; const m = o.userData.metadata; infoContent.innerHTML = `<h2>${m.name}</h2><div class="status-pill"><span class="dot"></span>${m.status}</div><h3>Purpose</h3><p>${m.purpose}</p><h3>Working Principle</h3><p>${m.principle}</p><h3>Specifications</h3><ul>${m.specs.map(x=>`<li>${x}</li>`).join('')}</ul><h3>Live Status</h3><p>${m.reading()}</p>`; infoCard.classList.add('open'); focusCamera(o); }
-    function resetCamera() { selected = null; infoCard.classList.remove('open'); focusAnimation = { startTime:performance.now(), duration:900, fromPosition:camera.position.clone(), toPosition:defaultCamera.position.clone(), fromTarget:controls.target.clone(), toTarget:defaultCamera.target.clone() }; }
-    addEventListener('pointermove', e => { pointer.x = e.clientX / innerWidth * 2 - 1; pointer.y = -(e.clientY / innerHeight) * 2 + 1; tooltip.style.left = `${Math.min(e.clientX + 10, innerWidth - 320)}px`; tooltip.style.top = `${Math.min(e.clientY + 10, innerHeight - 190)}px`; raycaster.setFromCamera(pointer,camera); const hits = raycaster.intersectObjects(interactive,true), hitOwner = hits.length ? owner(hits[0].object) : null; setHovered(hitOwner); document.body.style.cursor = hitOwner ? 'pointer' : 'default'; if (hitOwner) { tooltip.innerHTML = tip(hitOwner.userData.metadata); tooltip.classList.add('visible'); } else tooltip.classList.remove('visible'); });
-    addEventListener('click', () => { if (hovered) openInfo(hovered); });
-    addEventListener('dblclick', resetCamera);
-    document.getElementById('closeInfo').addEventListener('click', () => infoCard.classList.remove('open'));
-    document.getElementById('helpButton').addEventListener('click', () => document.getElementById('guide').classList.toggle('open'));
+const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 200);
+camera.position.set(6, 5, 10);
+camera.lookAt(0, 0, 0);
 
-    function updateLiveValues() { const now = performance.now()*.001; liveValues.water = Math.round(44 + Math.sin(now*.74)*8 + Math.sin(now*1.9)*2); liveValues.distance = 25 - liveValues.water*.16 + Math.sin(now*1.3)*.6; liveValues.debris = Math.sin(now*.38) > -.45 ? 'Detected' : 'Clear'; liveValues.temp = Math.round(29 + Math.sin(now*.28)*1.2); liveValues.wifi = Math.sin(now*.18) > -.92 ? 'Connected' : 'Retrying'; if (selected && infoCard.classList.contains('open')) { const live = infoContent.querySelector('h3:last-of-type + p'); if (live) live.textContent = selected.userData.metadata.reading(); } }
-    setInterval(updateLiveValues, 420); updateLiveValues();
+// ── Lighting ──────────────────────────────────────────────────────
+const ambient = new THREE.AmbientLight(0x223344, 2.5);
+scene.add(ambient);
 
-    const clock = new THREE.Clock();
-    function animate() { const elapsed = clock.getElapsedTime(), delta = clock.getDelta();
-      animated.forEach(item => {
-        if (item.type === 'water') { const pos = item.geometry.attributes.position; for (let i=0;i<pos.count;i++) { const x=pos.getX(i), z=pos.getZ(i); pos.setY(i, Math.sin(x*2.6+elapsed*1.55)*.035 + Math.cos(z*3.2+elapsed*1.1)*.026); } pos.needsUpdate = true; item.geometry.computeVertexNormals(); }
-        if (item.type === 'bubble') { item.mesh.position.y += item.speed*delta; item.mesh.position.x += Math.sin(elapsed*1.6+item.startY*5)*.0008; if (item.mesh.position.y > .78) item.mesh.position.y = .14; }
-        if (item.type === 'ultrabeam' || item.type === 'irbeam') { const boost = (hovered === ultrasonic && item.type === 'ultrabeam') || (hovered === ir && item.type === 'irbeam') ? .22 : 0; item.mesh.material.opacity = item.baseOpacity + boost + Math.sin(elapsed*item.speed)*.08; item.mesh.scale.x = item.mesh.scale.z = (item.type === 'irbeam' ? .16 : .32) * (1 + Math.sin(elapsed*item.speed)*.08); }
-        if (item.type === 'ultraParticle') { item.t = (item.t + item.speed*delta)%1; item.mesh.position.lerpVectors(new THREE.Vector3(-.15,1.78,.62), new THREE.Vector3(-.15,.82,.62), item.t); item.mesh.material.opacity = .25 + Math.sin(item.t*Math.PI)*.65; }
-        if (item.type === 'irParticle') { item.t = (item.t + item.speed*delta)%1; item.mesh.position.lerpVectors(new THREE.Vector3(1.22,1.35,.68), new THREE.Vector3(.8,.88,.18), item.t); item.mesh.material.opacity = .25 + Math.sin(item.t*Math.PI)*.65; }
-      });
-      dataParticles.forEach(p => { p.t = (p.t + p.speed*delta)%1; p.mesh.position.copy(p.path.getPointAt(p.t)); p.mesh.material.opacity = .18 + Math.sin(p.t*Math.PI)*.76; });
-      if (focusAnimation) { const progress = Math.min((performance.now()-focusAnimation.startTime)/focusAnimation.duration,1), eased = 1 - Math.pow(1-progress,3); camera.position.lerpVectors(focusAnimation.fromPosition, focusAnimation.toPosition, eased); controls.target.lerpVectors(focusAnimation.fromTarget, focusAnimation.toTarget, eased); if (progress >= 1) focusAnimation = null; }
-      if (hovered?.userData.highlight) hovered.userData.highlight.userData.update();
-      controls.update(); composer.render(); requestAnimationFrame(animate);
-    }
-    addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); composer.setSize(innerWidth,innerHeight); bloomPass.setSize(innerWidth,innerHeight); });
-    addEventListener('beforeunload', () => { scene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) (Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose()); }); renderer.dispose(); composer.dispose(); });
-    setTimeout(() => document.getElementById('loading').classList.add('hidden'), 450);
-    animate();
-  </script>
+const dirLight = new THREE.DirectionalLight(0x88ccff, 3);
+dirLight.position.set(8, 12, 8);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.set(1024, 1024);
+scene.add(dirLight);
+
+const fillLight = new THREE.PointLight(0x00d4ff, 2, 20);
+fillLight.position.set(-5, 3, 5);
+scene.add(fillLight);
+
+const rimLight = new THREE.PointLight(0x0044ff, 1.5, 15);
+rimLight.position.set(5, -2, -8);
+scene.add(rimLight);
+
+// ── Materials ─────────────────────────────────────────────────────
+const makeMat = (col, rough = 0.4, metal = 0.1, emit = 0x000000, emitInt = 0) =>
+  new THREE.MeshStandardMaterial({
+    color: col, roughness: rough, metalness: metal,
+    emissive: emit, emissiveIntensity: emitInt
+  });
+
+const matBox        = makeMat(0x1a2a3a, 0.6, 0.3);
+const matBoxLid     = makeMat(0x223344, 0.5, 0.35);
+const matPCB        = makeMat(0x114422, 0.7, 0.05);
+const matChip       = makeMat(0x222222, 0.5, 0.6);
+const matChipMark   = makeMat(0xffffff, 0.8, 0);
+const matUS         = makeMat(0x334466, 0.6, 0.3);
+const matUSEye      = makeMat(0x111111, 0.3, 0.8);
+const matIR         = makeMat(0x441111, 0.5, 0.2);
+const matIREye      = makeMat(0xff2244, 0.2, 0.1, 0xff2244, 0.8);
+const matBattery    = makeMat(0x3344aa, 0.4, 0.5);
+const matBatCap     = makeMat(0x555555, 0.5, 0.8);
+const matAntenna    = makeMat(0x444444, 0.4, 0.7);
+const matAntennaTop = makeMat(0x00aaff, 0.3, 0.5, 0x00aaff, 0.5);
+const matWireR      = makeMat(0xcc2222, 0.8, 0.05);
+const matWireG      = makeMat(0x22aa22, 0.8, 0.05);
+const matWireB      = makeMat(0x2222cc, 0.8, 0.05);
+const matWireY      = makeMat(0xddaa00, 0.8, 0.05);
+const matConnector  = makeMat(0x888888, 0.5, 0.7);
+const matLED        = makeMat(0x0000ff, 0.2, 0.1, 0x0044ff, 1.5);
+const matGlass      = new THREE.MeshStandardMaterial({
+  color: 0x88aacc, roughness: 0.05, metalness: 0.1,
+  transparent: true, opacity: 0.18
+});
+const matScrewHole  = makeMat(0x111111, 0.9, 0.6);
+
+// ── Helpers ───────────────────────────────────────────────────────
+const box = (w, h, d, mat, x=0, y=0, z=0) => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.position.set(x, y, z);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+};
+
+const cyl = (rt, rb, h, seg, mat, x=0, y=0, z=0, rx=0, ry=0, rz=0) => {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+  m.position.set(x, y, z);
+  m.rotation.set(rx, ry, rz);
+  m.castShadow = true;
+  return m;
+};
+
+const sph = (r, mat, x=0, y=0, z=0) => {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 16), mat);
+  m.position.set(x, y, z);
+  return m;
+};
+
+// ── Groups (for explode) ──────────────────────────────────────────
+const root      = new THREE.Group();
+const gBox      = new THREE.Group(); // outer shell
+const gLid      = new THREE.Group(); // lid (top)
+const gESP32    = new THREE.Group();
+const gUS       = new THREE.Group();
+const gIR       = new THREE.Group();
+const gBattery  = new THREE.Group();
+const gAntenna  = new THREE.Group();
+const gWires    = new THREE.Group();
+
+scene.add(root);
+[gBox, gLid, gESP32, gUS, gIR, gBattery, gAntenna, gWires].forEach(g => root.add(g));
+
+// ── Base positions (origin centers) ───────────────────────────────
+// Overall device: 7 × 3.5 × 4 (cm scale)
+const BW=7, BH=3.5, BD=4;
+
+// ┌─── OUTER BOX SHELL (5 faces, no top) ───────────────────────┐
+const wallT = 0.12;
+// bottom
+gBox.add(box(BW, wallT, BD, matBox, 0, -BH/2, 0));
+// front & back
+gBox.add(box(BW, BH, wallT, matBox, 0, 0,  BD/2));
+gBox.add(box(BW, BH, wallT, matBox, 0, 0, -BD/2));
+// left & right
+gBox.add(box(wallT, BH, BD, matBox, -BW/2, 0, 0));
+gBox.add(box(wallT, BH, BD, matBox,  BW/2, 0, 0));
+
+// Glass panel on front wall
+gBox.add(box(BW-0.5, BH-0.5, 0.04, matGlass, 0, 0, BD/2+0.01));
+
+// Corner screws
+[[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([sx, sz]) => {
+  const screw = cyl(0.08, 0.08, 0.15, 8, matScrewHole, sx*(BW/2-0.25), BH/2-0.08, sz*(BD/2-0.25));
+  gBox.add(screw);
+});
+
+// BKK-MicroFlow label (flat raised rect)
+const labelBg = box(2.5, 0.5, 0.06, makeMat(0x001122), 0, -BH/2+0.55, BD/2+0.05);
+gBox.add(labelBg);
+
+// LED status indicator
+const led = sph(0.08, matLED, 0, -BH/2+0.55, BD/2+0.1);
+gBox.add(led);
+// LED glow point light
+const ledLight = new THREE.PointLight(0x0044ff, 3, 1.5);
+ledLight.position.set(0, -BH/2+0.55, BD/2+0.2);
+gBox.add(ledLight);
+
+// ┌─── LID ─────────────────────────────────────────────────────┐
+const lid = box(BW, wallT, BD, matBoxLid, 0, BH/2, 0);
+gLid.add(lid);
+// Lid screws
+[[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([sx, sz]) => {
+  gLid.add(cyl(0.07, 0.05, 0.1, 8, matConnector, sx*(BW/2-0.25), BH/2+0.05, sz*(BD/2-0.25)));
+});
+
+// Antenna hole ring
+gLid.add(cyl(0.16, 0.16, wallT+0.02, 16, matConnector, 0, BH/2, -BD/4));
+
+// ┌─── ESP32 BOARD ──────────────────────────────────────────────┐
+{
+  const pcb = box(2.8, 0.1, 1.4, matPCB, 0, 0, 0);
+  gESP32.add(pcb);
+  // Main chip
+  const chip = box(0.9, 0.18, 0.9, matChip, 0, 0.14, 0);
+  gESP32.add(chip);
+  // Metal shield on chip
+  const shield = box(0.85, 0.06, 0.85, makeMat(0x888888,0.3,0.8), 0, 0.25, 0);
+  gESP32.add(shield);
+  // Antenna trace on chip
+  gESP32.add(box(0.5, 0.04, 0.08, matChipMark, 0.5, 0.25, 0));
+  // USB port
+  gESP32.add(box(0.35, 0.2, 0.15, makeMat(0x555555,0.4,0.7), -1.1, 0.05, -0.2));
+  // Pin headers (simplified)
+  for(let i=-5; i<=5; i++) {
+    if(i===0) continue;
+    gESP32.add(box(0.05, 0.22, 0.05, makeMat(0x222222,0.8,0.6), i*0.24, 0.16, 0.65));
+    gESP32.add(box(0.05, 0.22, 0.05, makeMat(0x222222,0.8,0.6), i*0.24, 0.16, -0.65));
+  }
+  // Decoupling caps
+  for(let i=0; i<4; i++) {
+    gESP32.add(box(0.1, 0.15, 0.1, makeMat(0x3355aa,0.5), -0.8+i*0.4, 0.12, 0.3));
+  }
+  // Onboard LED
+  gESP32.add(sph(0.06, makeMat(0x00ff44,0.2,0.1,0x00ff44,1.5), 1.1, 0.12, 0.3));
+
+  gESP32.position.set(-1, -BH/2+0.5, 0);
+}
+
+// ┌─── ULTRASONIC SENSOR HC-SR04 ────────────────────────────────┐
+{
+  const base = box(1.8, 0.1, 0.8, matPCB, 0, 0, 0);
+  gUS.add(base);
+  // Two eyes
+  [-0.5, 0.5].forEach(ox => {
+    const ring = cyl(0.28, 0.28, 0.35, 24, matUS, ox, 0.23, 0);
+    gUS.add(ring);
+    const eye = cyl(0.22, 0.22, 0.36, 24, matUSEye, ox, 0.24, 0);
+    gUS.add(eye);
+    // grid detail on eye
+    const grid = cyl(0.18, 0.18, 0.08, 8, makeMat(0x333333,0.6,0.5), ox, 0.44, 0);
+    gUS.add(grid);
+  });
+  // Trig/Echo labels (raised marks)
+  gUS.add(box(0.25, 0.04, 0.04, makeMat(0x336633), 0, 0.08, 0.38));
+  gUS.add(box(0.15, 0.04, 0.04, makeMat(0x336633), 0.3, 0.08, -0.38));
+  // Connector pins
+  for(let i=0; i<4; i++) {
+    gUS.add(cyl(0.04, 0.04, 0.3, 8, matConnector, -0.3+i*0.2, -0.2, 0.36));
+  }
+  gUS.position.set(1.5, -BH/2+0.65, 0.3);
+}
+
+// ┌─── IR SENSOR ────────────────────────────────────────────────┐
+{
+  const base = box(1.0, 0.1, 0.7, matPCB, 0, 0, 0);
+  gIR.add(base);
+  // Emitter (IR LED, clear dome)
+  const emitter = cyl(0.1, 0.1, 0.2, 16, makeMat(0xddccaa,0.3,0.1), -0.25, 0.15, 0);
+  const emTop = sph(0.1, makeMat(0xeeddbb,0.1,0), -0.25, 0.25, 0);
+  gIR.add(emitter, emTop);
+  // Receiver (red dome)
+  const recv = cyl(0.1, 0.1, 0.2, 16, matIR, 0.25, 0.15, 0);
+  const recvTop = sph(0.1, matIREye, 0.25, 0.25, 0);
+  gIR.add(recv, recvTop);
+  // Trim pot (variable resistor)
+  gIR.add(cyl(0.1, 0.1, 0.15, 16, makeMat(0x336644,0.6), 0, 0.12, -0.2));
+  // Connector
+  for(let i=0; i<3; i++) {
+    gIR.add(cyl(0.04, 0.04, 0.25, 8, matConnector, -0.2+i*0.2, -0.18, 0.3));
+  }
+  // Status LED
+  gIR.add(sph(0.06, makeMat(0xff0000,0.2,0.1,0xff0000,1.2), 0, 0.12, 0.3));
+
+  gIR.position.set(1.5, -BH/2+0.55, -0.8);
+}
+
+// ┌─── BATTERY / POWERBANK ──────────────────────────────────────┐
+{
+  const body = cyl(0.55, 0.55, 2.5, 32, matBattery, 0, 0, 0, 0, 0, Math.PI/2);
+  gBattery.add(body);
+  // Caps
+  gBattery.add(cyl(0.55, 0.4, 0.15, 32, matBatCap, -1.25, 0, 0, 0, 0, Math.PI/2));
+  gBattery.add(cyl(0.55, 0.4, 0.15, 32, matBatCap,  1.25, 0, 0, 0, 0, Math.PI/2));
+  // Wrap lines
+  for(let i=-4; i<=4; i+=2) {
+    gBattery.add(box(0.02, 1.1, 1.1, makeMat(0x2233aa,0.5), i*0.28, 0, 0));
+  }
+  // USB port on cap
+  gBattery.add(box(0.2, 0.12, 0.12, makeMat(0x333333,0.4,0.7), -1.3, 0, 0));
+
+  gBattery.position.set(-2, -BH/2+0.8, 0);
+}
+
+// ┌─── ANTENNA ──────────────────────────────────────────────────┐
+{
+  // Base connector
+  gAntenna.add(cyl(0.15, 0.15, 0.3, 16, matConnector, 0, 0, 0));
+  gAntenna.add(cyl(0.1, 0.1, 0.08, 16, matConnector, 0, 0.19, 0));
+  // Shaft
+  gAntenna.add(cyl(0.065, 0.065, 2.2, 16, matAntenna, 0, 1.3, 0));
+  // Tip
+  gAntenna.add(sph(0.1, matAntennaTop, 0, 2.45, 0));
+  // Ridges
+  for(let i=0; i<5; i++) {
+    gAntenna.add(cyl(0.09, 0.09, 0.06, 12, makeMat(0x666666,0.5,0.5), 0, 0.4+i*0.38, 0));
+  }
+
+  gAntenna.position.set(0, BH/2+0.15, -BD/4);
+}
+
+// ┌─── WIRES ────────────────────────────────────────────────────┐
+{
+  const wireR = (x1,y1,z1, x2,y2,z2, mat) => {
+    const pts = [new THREE.Vector3(x1,y1,z1), new THREE.Vector3(x2,y2,z2)];
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(x1,y1,z1),
+      new THREE.Vector3((x1+x2)/2, Math.max(y1,y2)+0.4, (z1+z2)/2),
+      new THREE.Vector3(x2,y2,z2)
+    ]);
+    const geo = new THREE.TubeGeometry(curve, 12, 0.04, 6, false);
+    const m = new THREE.Mesh(geo, mat);
+    gWires.add(m);
+  };
+
+  // ESP32 to Ultrasonic
+  wireR(-0.5, -BH/2+0.7, 0.3,  1.5, -BH/2+0.55, 0.5, matWireR);
+  wireR(-0.3, -BH/2+0.7, 0.3,  1.5, -BH/2+0.55, 0.4, matWireB);
+  wireR(-0.1, -BH/2+0.7, 0.3,  1.5, -BH/2+0.55, 0.3, matWireG);
+  wireR( 0.1, -BH/2+0.7, 0.3,  1.5, -BH/2+0.55, 0.2, matWireY);
+
+  // ESP32 to IR
+  wireR(-0.5, -BH/2+0.7, 0.1,  1.5, -BH/2+0.45, -0.6, matWireR);
+  wireR(-0.3, -BH/2+0.7, 0.1,  1.5, -BH/2+0.45, -0.7, matWireB);
+  wireR(-0.1, -BH/2+0.7, 0.1,  1.5, -BH/2+0.45, -0.8, matWireG);
+
+  // Battery to ESP32
+  wireR(-2, -BH/2+0.85, 0,  -1.2, -BH/2+0.5, 0, matWireR);
+  wireR(-2, -BH/2+0.75, 0,  -1.2, -BH/2+0.5, 0.15, matWireB);
+}
+
+// ── Ground grid ───────────────────────────────────────────────────
+const gridHelper = new THREE.GridHelper(30, 30, 0x112233, 0x0a1622);
+gridHelper.position.y = -BH/2 - 0.5;
+scene.add(gridHelper);
+
+// ── Particles ─────────────────────────────────────────────────────
+{
+  const cnt = 300;
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(cnt * 3);
+  for(let i=0; i<cnt*3; i++) pos[i] = (Math.random()-0.5)*40;
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({
+    color: 0x00d4ff, size: 0.06, transparent: true, opacity: 0.3
+  }));
+  scene.add(pts);
+}
+
+// ── Explode state ─────────────────────────────────────────────────
+let exploded = false;
+const originPositions = {
+  gBox:     new THREE.Vector3(0, 0, 0),
+  gLid:     new THREE.Vector3(0, 0, 0),
+  gESP32:   new THREE.Vector3(-1, -BH/2+0.5, 0),
+  gUS:      new THREE.Vector3(1.5, -BH/2+0.65, 0.3),
+  gIR:      new THREE.Vector3(1.5, -BH/2+0.55, -0.8),
+  gBattery: new THREE.Vector3(-2, -BH/2+0.8, 0),
+  gAntenna: new THREE.Vector3(0, BH/2+0.15, -BD/4),
+  gWires:   new THREE.Vector3(0, 0, 0),
+};
+const explodedPositions = {
+  gBox:     new THREE.Vector3(0, -3, 0),
+  gLid:     new THREE.Vector3(0,  4, 0),
+  gESP32:   new THREE.Vector3(-4, -1, 4),
+  gUS:      new THREE.Vector3(4,  0, 4),
+  gIR:      new THREE.Vector3(4, -2, -3),
+  gBattery: new THREE.Vector3(-5, 1, 0),
+  gAntenna: new THREE.Vector3(0,  6, -2),
+  gWires:   new THREE.Vector3(0, -5, 0),
+};
+
+const groups = { gBox, gLid, gESP32, gUS, gIR, gBattery, gAntenna, gWires };
+
+// Set initial positions
+Object.entries(groups).forEach(([k, g]) => {
+  g.position.copy(originPositions[k]);
+});
+
+function lerpGroups(t) {
+  Object.entries(groups).forEach(([k, g]) => {
+    g.position.lerpVectors(originPositions[k], explodedPositions[k], t);
+  });
+}
+
+let explodeT = 0, explodeTarget = 0;
+
+function toggleExplode() {
+  exploded = !exploded;
+  explodeTarget = exploded ? 1 : 0;
+  const btn = document.getElementById('explode-btn');
+  btn.classList.toggle('on', exploded);
+  btn.textContent = exploded ? '📦 ปิด กล่อง' : '📦 เปิด กล่อง';
+}
+
+// ── Orbit Controls (manual) ───────────────────────────────────────
+let isDragging = false, lastX = 0, lastY = 0;
+let azimuth = 0.4, polar = 0.5, radius = 14;
+let targetAzimuth = azimuth, targetPolar = polar, targetRadius = radius;
+
+const canvas = renderer.domElement;
+
+canvas.addEventListener('mousedown', e => {
+  isDragging = true; lastX = e.clientX; lastY = e.clientY;
+});
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+  if(!isDragging) return;
+  const dx = e.clientX - lastX, dy = e.clientY - lastY;
+  lastX = e.clientX; lastY = e.clientY;
+  targetAzimuth -= dx * 0.008;
+  targetPolar = Math.max(0.05, Math.min(Math.PI*0.45, targetPolar + dy * 0.006));
+});
+
+canvas.addEventListener('wheel', e => {
+  targetRadius = Math.max(4, Math.min(28, targetRadius + e.deltaY * 0.02));
+  e.preventDefault();
+}, { passive: false });
+
+// Touch
+let lastTouchDist = 0;
+canvas.addEventListener('touchstart', e => {
+  if(e.touches.length===1) { isDragging=true; lastX=e.touches[0].clientX; lastY=e.touches[0].clientY; }
+  if(e.touches.length===2) {
+    isDragging=false;
+    lastTouchDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+  }
+});
+canvas.addEventListener('touchend', () => { isDragging=false; });
+canvas.addEventListener('touchmove', e => {
+  if(e.touches.length===1 && isDragging) {
+    const dx=e.touches[0].clientX-lastX, dy=e.touches[0].clientY-lastY;
+    lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+    targetAzimuth -= dx*0.008; targetPolar = Math.max(0.05, Math.min(Math.PI*0.45, targetPolar+dy*0.006));
+  }
+  if(e.touches.length===2) {
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    targetRadius = Math.max(4, Math.min(28, targetRadius-(d-lastTouchDist)*0.05));
+    lastTouchDist=d;
+  }
+  e.preventDefault();
+}, { passive: false });
+
+function resetView() {
+  targetAzimuth = 0.4; targetPolar = 0.5; targetRadius = 14;
+}
+
+// ── Part highlighting ────────────────────────────────────────────
+const partData = {
+  box: {
+    label:'กล่องอุปกรณ์', title:'Enclosure Box',
+    desc:'กล่องพลาสติก ABS กันน้ำ IPX4 ออกแบบให้ติดตั้งใต้ฝาท่อระบายน้ำ ด้านหน้ามีกระจกใสสำหรับดูสถานะ LED',
+    specs:[['วัสดุ','ABS Plastic'],['กันน้ำ','IPX4'],['ขนาด','7×3.5×4 cm']]
+  },
+  esp32: {
+    label:'Microcontroller', title:'ESP32 Board',
+    desc:'บอร์ดหลักที่ประมวลผลข้อมูลจากเซนเซอร์และส่งขึ้น Cloud ผ่าน Wi-Fi มี CPU 2 core ความเร็ว 240 MHz พร้อม RAM 520 KB',
+    specs:[['CPU','240 MHz Dual-core'],['Wi-Fi','2.4 GHz 802.11n'],['GPIO','38 pins'],['ราคา','~120 ฿']]
+  },
+  ultrasonic: {
+    label:'Water Level Sensor', title:'Ultrasonic HC-SR04',
+    desc:'วัดระยะห่างของผิวน้ำด้วยคลื่นเสียงความถี่สูง ใช้ตรวจวัดระดับน้ำในท่อระบายน้ำ ส่งค่าผ่าน Trig/Echo pin',
+    specs:[['Range','2 – 400 cm'],['Accuracy','±1 cm'],['Frequency','40 kHz'],['ราคา','~25 ฿']]
+  },
+  ir: {
+    label:'Debris Sensor', title:'IR Obstacle Sensor',
+    desc:'ตรวจจับขยะหรือสิ่งกีดขวางในท่อโดยใช้แสง Infrared สะท้อนกลับ เมื่อมีขยะสะสม sensor จะส่งสัญญาณแจ้งเตือน',
+    specs:[['Range','2 – 30 cm'],['Output','Digital HIGH/LOW'],['LED','Dual Indicator'],['ราคา','~15 ฿']]
+  },
+  battery: {
+    label:'Power Supply', title:'Powerbank 18650',
+    desc:'แบตเตอรี่ลิเธียมไอออนขนาด 18650 จ่ายไฟ 5V ให้กับบอร์ด ESP32 และเซนเซอร์ทั้งหมด ชาร์จผ่าน Micro-USB',
+    specs:[['Voltage','3.7V → 5V',''],['Capacity','2600 mAh'],['Type','Li-Ion 18650'],['ราคา','~150 ฿']]
+  },
+  antenna: {
+    label:'Wireless', title:'Wi-Fi Antenna',
+    desc:'เสาอากาศ 2.4 GHz ความยาว 5 dBi สำหรับรับ-ส่งสัญญาณ Wi-Fi ต่อเชื่อมกับบอร์ด ESP32 ผ่าน U.FL connector',
+    specs:[['Band','2.4 GHz'],['Gain','5 dBi'],['Type','Stub Antenna'],['ราคา','~50 ฿']]
+  }
+};
+
+let activePart = null;
+function highlightPart(part) {
+  // toggle off same
+  if(activePart === part) {
+    activePart = null;
+    document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('info-panel').classList.remove('visible');
+    return;
+  }
+  activePart = part;
+  document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`btn-${part}`).classList.add('active');
+
+  const d = partData[part];
+  document.getElementById('ip-label').textContent = d.label;
+  document.getElementById('ip-title').textContent = d.title;
+  document.getElementById('ip-desc').textContent = d.desc;
+  let specHtml = '';
+  d.specs.forEach(([k, v]) => {
+    specHtml += `<div class="spec-row"><span>${k}</span><span class="spec-val">${v}</span></div>`;
+  });
+  document.getElementById('ip-spec').innerHTML = specHtml;
+  document.getElementById('info-panel').classList.add('visible');
+
+  // If not exploded, explode to show part
+  if(!exploded) { exploded=true; explodeTarget=1; document.getElementById('explode-btn').classList.add('on'); }
+}
+
+// ── Raycasting for hover tooltip ───────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const tooltip = document.getElementById('tooltip');
+
+const partMeshMap = new Map();
+gESP32.traverse(m => { if(m.isMesh) partMeshMap.set(m, {name:'ESP32 Board', desc:'Microcontroller + Wi-Fi'}); });
+gUS.traverse(m => { if(m.isMesh) partMeshMap.set(m, {name:'Ultrasonic HC-SR04', desc:'วัดระดับน้ำ'}); });
+gIR.traverse(m => { if(m.isMesh) partMeshMap.set(m, {name:'IR Sensor', desc:'ตรวจจับขยะ'}); });
+gBattery.traverse(m => { if(m.isMesh) partMeshMap.set(m, {name:'Powerbank 18650', desc:'แหล่งพลังงาน'}); });
+gAntenna.traverse(m => { if(m.isMesh) partMeshMap.set(m, {name:'Wi-Fi Antenna', desc:'ส่งข้อมูลไร้สาย'}); });
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const all = [];
+  partMeshMap.forEach((_, m) => all.push(m));
+  const hits = raycaster.intersectObjects(all);
+  if(hits.length && partMeshMap.has(hits[0].object)) {
+    const d = partMeshMap.get(hits[0].object);
+    document.getElementById('tt-name').textContent = d.name;
+    document.getElementById('tt-desc').textContent = d.desc;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX - rect.left + 14) + 'px';
+    tooltip.style.top  = (e.clientY - rect.top  - 10) + 'px';
+    canvas.style.cursor = 'pointer';
+  } else {
+    tooltip.style.display = 'none';
+    canvas.style.cursor = 'grab';
+  }
+});
+
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const all = [];
+  partMeshMap.forEach((_, m) => all.push(m));
+  const hits = raycaster.intersectObjects(all);
+  if(hits.length && partMeshMap.has(hits[0].object)) {
+    const d = partMeshMap.get(hits[0].object);
+    const map = {'ESP32 Board':'esp32','Ultrasonic HC-SR04':'ultrasonic','IR Sensor':'ir','Powerbank 18650':'battery','Wi-Fi Antenna':'antenna'};
+    if(map[d.name]) highlightPart(map[d.name]);
+  }
+});
+
+// ── Animation Loop ────────────────────────────────────────────────
+let t0 = performance.now();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = (performance.now() - t0) * 0.001;
+
+  // Smooth explode
+  explodeT += (explodeTarget - explodeT) * 0.07;
+  lerpGroups(explodeT);
+
+  // Smooth orbit
+  azimuth += (targetAzimuth - azimuth) * 0.07;
+  polar += (targetPolar - polar) * 0.07;
+  radius += (targetRadius - radius) * 0.07;
+
+  // Auto rotate when idle
+  if(!isDragging) targetAzimuth += 0.003;
+
+  // Update camera
+  camera.position.set(
+    Math.sin(azimuth) * Math.cos(polar) * radius,
+    Math.sin(polar) * radius,
+    Math.cos(azimuth) * Math.cos(polar) * radius
+  );
+  camera.lookAt(0, 0, 0);
+
+  // Pulsing fill light
+  fillLight.intensity = 2 + Math.sin(t * 2) * 0.5;
+
+  // LED blink
+  ledLight.intensity = (Math.sin(t * 3) > 0.5) ? 3 : 0.3;
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// ── Resize ────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  const w = container.clientWidth, h = container.clientHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+</script>
 </body>
 </html>
